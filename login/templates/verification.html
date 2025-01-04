@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verification</title>
+</head>
+<body>
+    <h1>Verification</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label>Verification Code:</label><br>
+        <input type="text" name="verification_code" required>
+        <button type="submit">Verify</button>
+
+    <p id="timer">00:30</p> <!-- Timer Display -->
+
+    <script>
+        // Set the countdown time in seconds (10 minutes)
+        let countdownTime = 30;
+
+        // Function to format the time
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Update the timer every second
+        const timerElement = document.getElementById('timer');
+        const timerInterval = setInterval(() => {
+            if (countdownTime > 0) {
+                countdownTime--;
+                timerElement.textContent = formatTime(countdownTime);
+            } else {
+                clearInterval(timerInterval);
+                timerElement.textContent = "Time's up!";
+            }
+        }, 1000);
+    </script>
+    </form>
+</body>
+</html>
