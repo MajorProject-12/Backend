@@ -1,20 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verification</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'login/styles.css' %}">
 </head>
 <body>
-    <h1>Verification</h1>
-    <form method="post">
-        {% csrf_token %}
-        <label>Verification Code:</label><br>
-        <input type="text" name="verification_code" required>
-        <button type="submit">Verify</button>
-
-    <p id="timer">00:30</p> <!-- Timer Display -->
+    <main>
+        <div class="container">
+            <h2>Verification</h2>
+            <p>Please enter the verification code sent to your email:</p>
+            <form method="POST">
+                {% csrf_token %}
+                <label for="verification_code">Verification Code:</label>
+                <input type="text" id="verification_code" name="verification_code" placeholder="Enter code" required>
+                <button type="submit">Verify</button>
+            </form>
+            <p id="timer">00:30</p> <!-- Timer Display -->
+        </div>
+    </main>
 
     <script>
-        // Set the countdown time in seconds (10 minutes)
+        // Set the countdown time in seconds (30 seconds)
         let countdownTime = 30;
 
         // Function to format the time
@@ -36,6 +45,5 @@
             }
         }, 1000);
     </script>
-    </form>
 </body>
 </html>
