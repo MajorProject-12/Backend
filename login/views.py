@@ -11,6 +11,7 @@ def forgot_password_view(request):
         request.session['email'] = email  # Store email in session
         return redirect("verification")
     return render(request, "forgot_password.html")
+
 # Verification Page
 def verification_view(request):
     if request.method == "POST":
