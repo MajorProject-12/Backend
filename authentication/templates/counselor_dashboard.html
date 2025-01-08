@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Counselor Dashboard{% endblock %}
+
+{% block content %}
+<h2>Welcome, {{ counselor.user.username }}</h2>
+<p>Branch: {{ counselor.get_branch_display }}</p>
+
+<h3>Assigned Students:</h3>
+<ul>
+    {% for student in assigned_students %}
+    <li>{{ student.user.username }} - {{ student.roll_number }}</li>
+    {% empty %}
+    <p>No students assigned.</p>
+    {% endfor %}
+</ul>
+{% endblock %}

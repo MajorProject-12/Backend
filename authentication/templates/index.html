@@ -17,71 +17,79 @@
     </header>
     <main>
         <div class="container">
-            <form class="login-form">
-            <h1 class="welcome-title">Welcome back!</h1>
-            <p class="welcome-subtitle">Please, Enter your details to continue</p>
-        
-            <div class="form-group">
-                <label for="role" class="input-label">Role</label>
-                <div class="input-field">
-                  <div class="input-wrapper">
-                    <div class="input-icon">
-                      <img src="{% static 'images/icons/person.svg' %}" alt="icon" />
+           <form class="login-form" method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                <h1 class="welcome-title">Welcome back!</h1>
+                <p class="welcome-subtitle">Please, Enter your details to continue</p>
+
+                <div class="form-group">
+                    <label for="role" class="input-label">Role</label>
+                    <div class="input-field">
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <img src="{% static 'images/icons/person.svg' %}" alt="icon" />
+                            </div>
+                            <select id="role" name="role" class="input-container" aria-label="Select your role">
+                                <option value="">Select your role</option>
+                                <option value="Counselor">Counselor</option>
+                                <option value="Student">Student</option>
+                            </select>
+                        </div>
                     </div>
-                    <select id="role" class="input-container" aria-label="Select your role">
-                      <option value="">Select your role</option>
-                      <option value="">Staff</option>
-                      <option value="">Student</option>
-                    </select>
-                  </div>
                 </div>
-              </div>
-      
-              <div class="form-group">
-                <label for="email" class="input-label">Email</label>
-                <div class="input-field">
-                  <div class="input-wrapper">
-                    <div class="input-icon">
-                      <img src="{% static 'images/icons/email.svg' %}" alt="icon" />
+
+                <div class="form-group">
+                    <label for="email" class="input-label">Email</label>
+                    <div class="input-field">
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <img src="{% static 'images/icons/email.svg' %}" alt="icon" />
+                            </div>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="input-container"
+                                placeholder="email address"
+                                required
+                            />
+                        </div>
                     </div>
-                    <input 
-                      type="email" 
-                      id="email"
-                      class="input-container"
-                      placeholder="email address"
-                      required
-                    />
-                  </div>
                 </div>
-              </div>
-      
-              <div class="form-group">
-                <label for="password" class="input-label">Password</label>
-                <div class="input-field">
-                  <div class="input-wrapper">
-                    <div class="input-icon">
-                      <img src="{% static 'images/icons/lock.svg' %}" alt="icon" />
+
+                <div class="form-group">
+                    <label for="password" class="input-label">Password</label>
+                    <div class="input-field">
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <img src="{% static 'images/icons/lock.svg' %}" alt="icon" />
+                            </div>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="input-container"
+                                placeholder="password"
+                                required
+                            />
+                        </div>
                     </div>
-                    <input
-                      type="password"
-                      id="password" 
-                      class="input-container"
-                      placeholder="password"
-                      required
-                    />
-                  </div>
                 </div>
-              </div>
-      
-              <div class="remember-forgot">
-                <label class="remember-option">
-                  <input type="checkbox" class="checkbox" id="remember" />
-                  <span>Remember for 30 days</span>
-                </label>
-                <a href="forget_password.html" class="forgot-link">Forgot password</a>
-              </div>
-      
-              <button type="submit" class="submit-button">Sign in</button>
+               <div class="remember-forgot">
+                    <label class="remember-option">
+                        <input type="checkbox" name="remember" class="checkbox" id="remember" />
+                        <span>Remember for 30 days</span>
+                    </label>
+                   <a href="forget_password.html" class="forgot-link">Forgot password</a>
+                </div>
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                        <li class="{{ message.tags }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+               {% endif %}
+                <button type="submit" class="submit-button">Sign in</button>
             </form>
         </div>
     </main>
