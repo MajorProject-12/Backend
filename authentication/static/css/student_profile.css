@@ -1,0 +1,244 @@
+body {
+    background-color: #F8F9FC;
+    font-family: Outfit, sans-serif;
+    background: url("images/Background2.svg") no-repeat top center;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: #000;
+    min-height: 100vh;
+    font-family: sans-serif;
+}
+
+header{
+    background: rgba(248, 249, 252, 0.147);
+}
+
+#notification-dropdown-menu {
+    background: rgba(248, 249, 252, 0.250);
+}
+
+.dropdown-menu{
+    background: rgba(248, 249, 252, 0.250);
+}
+
+.content-background{
+    display: block;
+    margin: 35px auto;
+    border: none;
+    border-radius: 1.5rem;
+    box-shadow: 0px 0px 40px 0px;
+    padding-top: 25px;
+    background: rgba(248, 249, 252, 0.147);
+    width: fit-content;
+}
+
+.content-wrapper {
+    width: fit-content;
+    margin: auto;
+}
+
+.content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    /*gap: 80px;*/
+    padding: 0px;
+    margin: 50px;
+    margin-top: 0px;
+}
+
+.info {
+    flex: 1;
+    display: flex;
+}
+
+.info-wrapper {
+    display: flex;
+    padding: 50px;
+    padding-top: 0px;
+    padding-right: 0px;
+    width: fit-content;
+    text-align: start;
+    margin-bottom: -25px;
+}
+
+.page-title {
+    font-size: 48px;
+    line-height: 50px;
+    text-align: center;
+    font-family: Outfit, sans-serif;
+    margin-bottom: 5px;
+}
+
+.img-wrapper{
+    display: flex;
+    justify-content: flex-end;
+    align-self: center;
+    height: 400px;
+    
+}
+
+li{
+    list-style: none;
+    line-height: 35px;
+}
+
+.edit-button {
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    gap: 1px;
+    color: rgb(0, 0, 0); 
+    height: 3.1875rem;
+    flex-shrink: 0;
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0px 0px 4px 0px;
+    padding: 10px 20px;
+    font-size: 16px; 
+    font-family: outfit;
+    cursor: pointer;
+    margin-left: 20px; 
+    background: #d6dede69;
+    transition: background-color 0.3s ease-in-out;
+   
+}
+
+.edit-button:hover {
+    background-color: #63686d49;
+}
+
+.title-button-container {
+    display: flex; 
+    align-items: center; 
+    text-align: center;
+    padding-left: 40px;
+    gap: 20px; 
+}
+
+.edit-icon {
+    margin-left: 10px; 
+    height: 20px;
+}
+
+.list-container {
+    text-align: left; 
+    margin-top: 10px;
+}
+
+hr {
+    border: 1px solid #9b9b9b; 
+    margin: 20px 0;
+}
+
+
+.face-recognition-section {
+    display: flex;
+    align-items: center; 
+    gap: 15px; 
+    margin-top: 20px;
+    padding-left: 30px;
+
+}
+
+.scan-button {
+    background-color: #d6dede69; 
+    color: rgb(0, 0, 0); 
+    height: 2.5rem;
+    width: 5rem;
+    flex-shrink: 0;
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0px 0px 4px 0px;
+    padding: 8px 16px;
+    font-family: outfit; 
+    font-size: 16px; 
+    cursor: pointer; 
+    transition: background-color 0.3s ease-in-out;
+}
+
+.scan-button:hover {
+    background-color: #63686d49; 
+}
+
+@media (max-width: 600px) {
+
+body {
+overflow-x: hidden;
+}
+
+.burger-dropdown{
+    background: rgba(248, 249, 252, 0.250);
+}
+
+.content-wrapper {
+width: 100%;
+margin: 0;
+padding: 10px;
+box-sizing: border-box; 
+}
+
+
+.content {
+flex-direction: column;
+align-items: center;
+margin: 0;
+padding: 10px;
+}
+
+
+.info {
+width: 100%;
+margin: 0;
+padding: 0;
+}
+
+.info-wrapper {
+padding: 10px;
+margin: 0;
+text-align: center;
+}
+
+.page-title {
+font-size: 32px; 
+line-height: 36px;
+}
+
+.img-wrapper{
+    height: 250px;
+    justify-content: center;
+}
+
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #162D3A;
+}
+
+select.form-control {
+    background-color: white;
+}
+
+.form-control[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.save-button {
+    background-color: #28a745;
+    color: white;
+}

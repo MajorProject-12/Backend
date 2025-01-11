@@ -76,8 +76,8 @@
             <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
         </div>
         <div class="dropdown-menu" id="dropdown-menu">
-            <h2>Hello Ram!</h2>
-            <a class="menu-item" href="#">Profile</a>
+            <h2>Hello {{ student.user.username }}!</h2>
+            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
             <a class="menu-item" href="#">Settings</a>
             <div class="footer">
                 <span>FAQs</span>

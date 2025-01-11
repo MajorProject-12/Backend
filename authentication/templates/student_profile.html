@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile</title>
+    {% load static %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/student_profile.css' %}">
+    <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'js/student_profile.js' %}"></script>
+
+</head>
+<body style="background-image: url({% static 'images/Background2.svg' %})">
+    <header>
+        <div class="logo-container">
+            <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
+        </div>
+        <nav class="nav-content">
+            <div class="nav-links">
+                <a href="#" class="nav-item" id="nav-item0">Dashboard</a>
+                <a href="{% url 'student_dashboard' %}" class="nav-item" id="nav-item1">Check In</a>
+                <a href="#" class="nav-item" id="nav-item2">Statistics</a>
+                <a href="#" class="nav-item" id="nav-item3">Remarks</a>
+                <a href="#" class="nav-item" id="nav-item4">Leave Application</a>
+            </div>
+        </nav>
+        </nav>
+
+        <div class="right-container">
+            <div class="notifications" id="notifications">
+                <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
+            </div>
+            <div class="burger-menu" id="burger-menu">
+                <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="notification-dropdown-menu">
+            <h2>Notifications</h2>
+            <a class="menu-item" href="#">Notification 1</a>
+            <a class="menu-item" href="#">Notification 2</a>
+            <a class="menu-item" href="#">Notification 3</a>
+            <div class="footer">
+                <span>View All</span>
+            </div>
+        </div>
+
+        <div class="burger-dropdown" id="burger-dropdown">
+            <h2>Menu</h2>
+            <a class="menu-item" href="#">Dashboard</a>
+            <a class="menu-item" href="{% url 'student_dashboard' %}">Check In</a>
+            <a class="menu-item" href="#">Statistics</a>
+            <a class="menu-item" href="#">Remarks</a>
+            <a class="menu-item" href="#">Leave Application</a>
+            <hr>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <span>FAQs</span>
+                <a href="{% url 'logout' %}">Sign out</a>
+            </div>
+        </div>
+
+        <div class="profile-container" id="profile-container">
+        <div class="profile" id="profile">
+            <img alt="User  profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+            <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu">
+            <h2>Hello </h2>
+            <a class="menu-item" href="student_profile.html">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <span>FAQs</span>
+                <a href="{% url 'logout' %}">Sign out</a>
+            </div>
+        </div>
+    </div>
+    </header>
+    <div class="content-background">
+    <main class="content-wrapper">
+        <div class="content">
+
+            <div class="info">
+                <div class="info-wrapper">
+                    <div class="info-content">
+                        <div class="title-button-container">
+                            <h1 class="page-title">Academic <br>Details</h1>
+                            <button class="edit-button" id="editButton">
+                                <b>Edit</b><img class="edit-icon" src="{% static 'images/icons/Pen.svg' %}" alt="Pen">
+                            </button>
+                        </div>
+                    <!-- Display View -->
+                    <div class="list-container" id="displayView">
+                        <ul>
+                            <li><b>Name:</b> {{ student.user.username }}</li>
+                            <li><b>Roll number:</b> {{ student.roll_number }}</li>
+                            <li><b>Branch:</b> {{ student.branch }}</li>
+                            <li><b>Year:</b> {{ student.year }}</li>
+                            <li><b>Semester:</b> {{ student.semester }}</li>
+                            <li><b>Mail:</b> {{ student.user.email }}</li>
+                            <li><b>Gender:</b> {{ student.gender }}</li>
+                        </ul>
+                    </div>
+
+                    <!-- Edit Form -->
+                    <div class="list-container" id="editView" style="display: none;">
+                        <form id="editProfileForm" method="POST" action="{% url 'update_profile' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label><b>Name:</b></label>
+                                <input type="text" name="username" value="{{ student.user.username }}" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label><b>Roll number:</b></label>
+                                <input type="text" name="roll_number" value="{{ student.roll_number }}" readonly class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label><b>Branch:</b></label>
+                                <select name="branch" class="form-control">
+                                    {% for code, name in student.BRANCH_CHOICES %}
+                                        <option value="{{ code }}" {% if student.branch == code %}selected{% endif %}>{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><b>Year:</b></label>
+                                <select name="year" class="form-control">
+                                    {% for code, name in student.YEAR_CHOICES %}
+                                        <option value="{{ code }}" {% if student.year == code %}selected{% endif %}>{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><b>Semester:</b></label>
+                                <select name="semester" class="form-control">
+                                    {% for code, name in student.SEMESTER_CHOICES %}
+                                        <option value="{{ code }}" {% if student.semester == code %}selected{% endif %}>{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><b>Mail:</b></label>
+                                <input type="email" name="email" value="{{ student.user.email }}" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label><b>Gender:</b></label>
+                                <select name="gender" class="form-control">
+                                    {% for code, name in student.GENDER_CHOICES %}
+                                        <option value="{{ code }}" {% if student.gender == code %}selected{% endif %}>{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="img-wrapper">
+                <img src="{% static 'images/illustrations/profile-illustration.svg' %}" alt="illustration">
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

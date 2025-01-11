@@ -1,17 +1,110 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counselor Dashboard</title>
+    {% load static %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/counselor_dashboard.css' %}">
+    <script src="{% static 'js/header.js' %}"></script>
 
-{% block title %}Counselor Dashboard{% endblock %}
+</head>
+<body style="background-image: url({% static 'images/Background2.svg' %})">
+    <header>
+        <div class="logo-container">
+            <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
+        </div>
+        <nav class="nav-content">
+            <div class="nav-links">
+                <a href="#" class="nav-item" id="nav-item0">Dashboard</a>
+                <a href="#" class="nav-item" id="nav-item1">Manage Students</a>
+                <a href="#" class="nav-item" id="nav-item2">Attendence Statistics</a>
+            </div>
+        </nav>
 
-{% block content %}
-<h2>Welcome, {{ counselor.user.username }}</h2>
-<p>Branch: {{ counselor.get_branch_display }}</p>
+        <div class="right-container">
+            <div class="notifications" id="notifications">
+                <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
+            </div>
+            <div class="burger-menu" id="burger-menu">
+                <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
+            </div>
+        </div>
 
-<h3>Assigned Students:</h3>
-<ul>
-    {% for student in assigned_students %}
-    <li>{{ student.user.username }} - {{ student.roll_number }}</li>
-    {% empty %}
-    <p>No students assigned.</p>
-    {% endfor %}
-</ul>
-{% endblock %}
+        <div class="dropdown-menu" id="notification-dropdown-menu">
+            <h2>Notifications</h2>
+            <a class="menu-item" href="#">Notification 1</a>
+            <a class="menu-item" href="#">Notification 2</a>
+            <a class="menu-item" href="#">Notification 3</a>
+            <div class="footer">
+                <span>View All</span>
+            </div>
+        </div>
+
+        <div class="burger-dropdown" id="burger-dropdown">
+            <h2>Menu</h2>
+            <a class="menu-item" href="#">Dashboard</a>
+            <a class="menu-item" href="#">Manage Students</a>
+            <a class="menu-item" href="#">Attendence Statistics</a>
+            <hr>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <span>FAQs</span>
+                <a href="{% url 'logout' %}">Sign out</a>
+            </div>
+        </div>
+
+        <div class="profile-container" id="profile-container">
+        <div class="profile" id="profile">
+            <img alt="User  profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+            <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu">
+            <h2>Hello {{ counselor.user.username }}</h2>
+            <a class="menu-item" href="">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <span>FAQs</span>
+                <a href="{% url 'logout' %}">Sign out</a>
+            </div>
+        </div>
+    </div>
+    </header>
+    <div class="content-background">
+    <main class="content-wrapper">
+        <div class="content">
+
+            <div class="info">
+                <div class="info-wrapper">
+                    <div class="info-content">
+                        <h1 class="info-title">Welcome, <br>{{ counselor.user.username }}</h1>
+                        <p>Branch: {{ counselor.get_branch_display }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details">
+                <div class="details-wrapper">
+                    <div class="details-content">
+                        <h1 class="details-title">Assigned Students:</h1>
+                        <ul>
+                            {% for student in assigned_students %}
+                            <li>{{ student.user.username }} - {{ student.roll_number }}</li>
+                            {% empty %}
+                            <p>No students assigned.</p>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+</body>
+</html>

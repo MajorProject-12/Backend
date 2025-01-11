@@ -80,7 +80,7 @@
                         <input type="checkbox" name="remember" class="checkbox" id="remember" />
                         <span>Remember for 30 days</span>
                     </label>
-                   <a href="forget_password.html" class="forgot-link">Forgot password</a>
+                   <a href="{% url 'forgotpassword' %}" class="forgot-link">Forgot password</a>
                 </div>
                 {% if messages %}
                     <ul class="messages">
