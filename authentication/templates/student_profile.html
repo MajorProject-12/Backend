@@ -28,7 +28,6 @@
                 <a href="#" class="nav-item" id="nav-item4">Leave Application</a>
             </div>
         </nav>
-        </nav>
 
         <div class="right-container">
             <div class="notifications" id="notifications">
@@ -51,17 +50,17 @@
 
         <div class="burger-dropdown" id="burger-dropdown">
             <h2>Menu</h2>
-            <a class="menu-item" href="#">Dashboard</a>
-            <a class="menu-item" href="{% url 'student_dashboard' %}">Check In</a>
-            <a class="menu-item" href="#">Statistics</a>
-            <a class="menu-item" href="#">Remarks</a>
-            <a class="menu-item" href="#">Leave Application</a>
+            <a class="menu-item" href="student_dashboard.html">Dashboard</a>
+            <a class="menu-item" href="student_check_in.html">Check In</a>
+            <a class="menu-item" href="student_statistics.html">Statistics</a>
+            <a class="menu-item" href="student_remarks.html">Remarks</a>
+            <a class="menu-item" href="student_leave.html">Leave Application</a>
             <hr>
-            <a class="menu-item" href="#">Profile</a>
-            <a class="menu-item" href="#">Settings</a>
+            <a class="menu-item" href="student_profile.html">Profile</a>
+            <a class="menu-item" href="student_settings.html">Settings</a>
             <div class="footer">
-                <span>FAQs</span>
-                <a href="{% url 'logout' %}">Sign out</a>
+                <a href="student_faqs.html" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
             </div>
         </div>
 
@@ -71,12 +70,12 @@
             <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
         </div>
         <div class="dropdown-menu" id="dropdown-menu">
-            <h2>Hello </h2>
+            <h2>Hello Ram!</h2>
             <a class="menu-item" href="student_profile.html">Profile</a>
-            <a class="menu-item" href="#">Settings</a>
+            <a class="menu-item" href="student_settings.html">Settings</a>
             <div class="footer">
-                <span>FAQs</span>
-                <a href="{% url 'logout' %}">Sign out</a>
+                <a href="student_faqs.html" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
             </div>
         </div>
     </div>
@@ -87,83 +86,142 @@
 
             <div class="info">
                 <div class="info-wrapper">
-                    <div class="info-content">
+
+                    <div class="info-content-1">
                         <div class="title-button-container">
                             <h1 class="page-title">Academic <br>Details</h1>
-                            <button class="edit-button" id="editButton">
-                                <b>Edit</b><img class="edit-icon" src="{% static 'images/icons/Pen.svg' %}" alt="Pen">
-                            </button>
+                            <button class="edit-button"><b>Edit</b><img class="edit-icon" src="{% static 'images/icons/Pen.svg' %}" alt="Pen"></button>
                         </div>
-                    <!-- Display View -->
-                    <div class="list-container" id="displayView">
-                        <ul>
-                            <li><b>Name:</b> {{ student.user.username }}</li>
-                            <li><b>Roll number:</b> {{ student.roll_number }}</li>
-                            <li><b>Branch:</b> {{ student.branch }}</li>
-                            <li><b>Year:</b> {{ student.year }}</li>
-                            <li><b>Semester:</b> {{ student.semester }}</li>
-                            <li><b>Mail:</b> {{ student.user.email }}</li>
-                            <li><b>Gender:</b> {{ student.gender }}</li>
-                        </ul>
+                        <div class="list-container">
+                            <ul>
+                                <li><b>Name:</b> {{ student.user.username }}</li>
+                                <li><b>Roll number:</b> {{ student.roll_number }}</li>
+                                <li><b>Branch:</b> {{ student.branch }}</li>
+                                <li><b>Year:</b> {{ student.year }}</li>
+                                <li><b>Semester:</b> {{ student.semester }}</li>
+                                <li><b>Mail:</b> {{ student.user.email }}</li>
+                                <li><b>Gender:</b> {{ student.gender }}</li>
+                            </ul>
+                        </div>
+                        <hr>
+                        <div class="face-recognition-section">
+                            <span><b>Face Recognition:</b> Unregistered</span>
+                            <button class="scan-button"><b>Scan</b><img class="scan-icon" src="{% static 'images/icons/scan-user.svg' %}" alt="scan"></button>
+                        </div>
                     </div>
 
-                    <!-- Edit Form -->
-                    <div class="list-container" id="editView" style="display: none;">
-                        <form id="editProfileForm" method="POST" action="{% url 'update_profile' %}">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <label><b>Name:</b></label>
-                                <input type="text" name="username" value="{{ student.user.username }}" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label><b>Roll number:</b></label>
-                                <input type="text" name="roll_number" value="{{ student.roll_number }}" readonly class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label><b>Branch:</b></label>
-                                <select name="branch" class="form-control">
-                                    {% for code, name in student.BRANCH_CHOICES %}
-                                        <option value="{{ code }}" {% if student.branch == code %}selected{% endif %}>{{ name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><b>Year:</b></label>
-                                <select name="year" class="form-control">
-                                    {% for code, name in student.YEAR_CHOICES %}
-                                        <option value="{{ code }}" {% if student.year == code %}selected{% endif %}>{{ name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><b>Semester:</b></label>
-                                <select name="semester" class="form-control">
-                                    {% for code, name in student.SEMESTER_CHOICES %}
-                                        <option value="{{ code }}" {% if student.semester == code %}selected{% endif %}>{{ name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><b>Mail:</b></label>
-                                <input type="email" name="email" value="{{ student.user.email }}" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label><b>Gender:</b></label>
-                                <select name="gender" class="form-control">
-                                    {% for code, name in student.GENDER_CHOICES %}
-                                        <option value="{{ code }}" {% if student.gender == code %}selected{% endif %}>{{ name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </form>
+                    <div class="info-content-2">
+                        <div class="title-button-container">
+                            <img src="{% static 'images/icons/arrow-left.svg' %}" alt="back" class="back-icon">
+                            <h1 class="page-title">Academic <br>Details</h1>
+                            <button class="save-button" id="save-button"><b>Save</b><img class="edit-icon" src="{% static 'images/icons/Pen.svg' %}" alt="Pen"></button>
+                        </div>
+                        <div class="form-container">
+                            <form id="editProfileForm" 
+                                  method="POST" 
+                                  action="{% url 'update_profile' %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label><b>Name:</b></label>
+                                    <input type="text" 
+                                           name="username" 
+                                           value="{{ student.user.username }}" 
+                                           class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Roll number:</b></label>
+                                    <input type="text" 
+                                           name="roll_number" 
+                                           value="{{ student.roll_number }}" 
+                                           readonly 
+                                           class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Branch:</b></label>
+                                    <select name="branch" class="form-control">
+                                        {% for code, name in student.BRANCH_CHOICES %}
+                                            <option value="{{ code }}" 
+                                                    {% if student.branch == code %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Year:</b></label>
+                                    <select name="year" class="form-control">
+                                        {% for code, name in student.YEAR_CHOICES %}
+                                            <option value="{{ code }}" 
+                                                    {% if student.year == code %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Semester:</b></label>
+                                    <select name="semester" class="form-control">
+                                        {% for code, name in student.SEMESTER_CHOICES %}
+                                            <option value="{{ code }}" 
+                                                    {% if student.semester == code %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Mail:</b></label>
+                                    <input type="email" 
+                                           name="email" 
+                                           value="{{ student.user.email }}" 
+                                           class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Gender:</b></label>
+                                    <select name="gender" class="form-control">
+                                        {% for code, name in student.GENDER_CHOICES %}
+                                            <option value="{{ code }}" 
+                                                    {% if student.gender == code %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <hr>
                     </div>
-                    </div>
+
+                    <div class="info-content-3">
+                        <div class="title-button-container">
+                            <h1 class="page-title">Face <br>Recognition</h1>
+                            <button class="close-button"><b>Close</b><img class="edit-icon" src="{% static 'images/icons/button-close.svg' %}" alt="close"></button>
+                        </div>
+                        <div class="scanner-container">
+                            <div class="scanner">
+                                <div class="scanner-wrapper">
+                                    <div class="face-scanner">
+                                        <div class="scanner-view">
+                                            <video id="video" autoplay style="display: none;" width="100%" height="100%"></video>
+                                            <img loading="lazy" src="{% static 'images/icons/face-scan-white.svg' %}" class="scanner-icon" alt="Face Scanner Interface" />
+                                        </div>
+                                        <div class="greeting-text">Hello !</div>
+                                        <button class="scan-button-main">
+                                            <span>Scan</span>
+                                            <img loading="lazy" src="{% static 'images/icons/photo-capture.svg' %}" class="scan-icon-main" alt="" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+
                 </div>
             </div>
-
             <div class="img-wrapper">
                 <img src="{% static 'images/illustrations/profile-illustration.svg' %}" alt="illustration">
             </div>
+            
         </div>
     </main>
 </div>
