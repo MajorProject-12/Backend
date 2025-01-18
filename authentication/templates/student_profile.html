@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Profile</title>
     {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
@@ -21,8 +22,8 @@
         </div>
         <nav class="nav-content">
             <div class="nav-links">
-                <a href="#" class="nav-item" id="nav-item0">Dashboard</a>
-                <a href="{% url 'student_dashboard' %}" class="nav-item" id="nav-item1">Check In</a>
+                <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
+                <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
                 <a href="#" class="nav-item" id="nav-item2">Statistics</a>
                 <a href="#" class="nav-item" id="nav-item3">Remarks</a>
                 <a href="#" class="nav-item" id="nav-item4">Leave Application</a>
@@ -50,16 +51,16 @@
 
         <div class="burger-dropdown" id="burger-dropdown">
             <h2>Menu</h2>
-            <a class="menu-item" href="student_dashboard.html">Dashboard</a>
-            <a class="menu-item" href="student_check_in.html">Check In</a>
-            <a class="menu-item" href="student_statistics.html">Statistics</a>
-            <a class="menu-item" href="student_remarks.html">Remarks</a>
-            <a class="menu-item" href="student_leave.html">Leave Application</a>
+            <a class="menu-item" href="#">Dashboard</a>
+            <a class="menu-item" href="#">Check In</a>
+            <a class="menu-item" href="#">Statistics</a>
+            <a class="menu-item" href="#">Remarks</a>
+            <a class="menu-item" href="#">Leave Application</a>
             <hr>
-            <a class="menu-item" href="student_profile.html">Profile</a>
-            <a class="menu-item" href="student_settings.html">Settings</a>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
             <div class="footer">
-                <a href="student_faqs.html" id="faqs"><span>FAQs</span></a>
+                <a href="#" id="faqs"><span>FAQs</span></a>
                 <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
             </div>
         </div>
@@ -70,11 +71,11 @@
             <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
         </div>
         <div class="dropdown-menu" id="dropdown-menu">
-            <h2>Hello Ram!</h2>
-            <a class="menu-item" href="student_profile.html">Profile</a>
-            <a class="menu-item" href="student_settings.html">Settings</a>
+            <h2>Hello {{ student.user.username }}!</h2>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
             <div class="footer">
-                <a href="student_faqs.html" id="faqs"><span>FAQs</span></a>
+                <a href="#" id="faqs"><span>FAQs</span></a>
                 <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
             </div>
         </div>

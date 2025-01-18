@@ -3,26 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>student Dashboard</title>
+    <title>Home</title>
     {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
-    <link rel="stylesheet" href="{% static 'css/student_dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <script src="{% static 'js/header.js' %}"></script>
-    
+    <script src="{% static 'js/home.js' %}"></script>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
+<!--    {% if messages %}-->
+<!--        <div class="messages">-->
+<!--            {% for message in messages %}-->
+<!--            <div class="message {{ message.tags }}">-->
+<!--                {{ message }}-->
+<!--            </div>-->
+<!--            {% endfor %}-->
+<!--        </div>-->
+<!--    {% endif %}-->
     <header>
         <div class="logo-container">
             <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
         </div>
         <nav class="nav-content">
             <div class="nav-links">
-                <a href="#" class="nav-item" id="nav-item0">Dashboard</a>
-                <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
+                <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
+                <a href="#" class="nav-item" id="nav-item1">Check In</a>
                 <a href="#" class="nav-item" id="nav-item2">Statistics</a>
                 <a href="#" class="nav-item" id="nav-item3">Remarks</a>
                 <a href="#" class="nav-item" id="nav-item4">Leave Application</a>
@@ -50,17 +59,16 @@
 
         <div class="burger-dropdown" id="burger-dropdown">
             <h2>Menu</h2>
-            <a class="menu-item" href="#">Dashboard</a>
-            <a class="menu-item" href="{% url 'student_check_in' %}">Check In</a>
+            <a class="menu-item" href="#">Check In</a>
             <a class="menu-item" href="#">Statistics</a>
             <a class="menu-item" href="#">Remarks</a>
             <a class="menu-item" href="#">Leave Application</a>
             <hr>
-            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
+            <a class="menu-item" href="#">Profile</a>
             <a class="menu-item" href="#">Settings</a>
             <div class="footer">
-                <a href="#" id="faqs"><span>FAQs</span></a>
-                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+                <span>FAQs</span>
+                <a href="{% url 'logout' %}">Sign out</a>
             </div>
         </div>
 
@@ -74,8 +82,8 @@
             <a class="menu-item" href="{% url 'profile' %}">Profile</a>
             <a class="menu-item" href="#">Settings</a>
             <div class="footer">
-                <a href="#" id="faqs"><span>FAQs</span></a>
-                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+                <span>FAQs</span>
+                <a href="{% url 'logout' %}">Sign out</a>
             </div>
         </div>
     </div>
@@ -84,23 +92,27 @@
     <main class="content-wrapper">
         <div class="content">
 
-            <div class="info">
-                <div class="info-wrapper">
-                    <div class="info-content">
-                        <h1 class="info-title">Welcome, <br>{{ student.user.username }}</h1>
-                        <p>Roll No: {{ student.roll_number }}</p>
-                        <p>Branch: {{ student.branch }}</p>
+            <div class="scanner">
+                <div class="scanner-wrapper">
+                    <div class="face-scanner">
+                        <div class="scanner-view">
+                            <video id="video" autoplay style="display: none;" width="100%" height="100%"></video>
+                            <img loading="lazy" src="{% static 'images/icons/face-scan-white.svg' %}" class="scanner-icon" alt="Face Scanner Interface" />
+                        </div>
+                        <div class="greeting-text">Hello !</div>
+                        <button class="scan-button">
+                            <span>Scan</span>
+                            <img loading="lazy" src="{% static 'images/icons/photo-capture.svg' %}" class="scan-icon" alt="" />
+                        </button>
                     </div>
                 </div>
             </div>
-            
-            <div class="details">
-                <div class="details-wrapper">
-                    <div class="details-content">
-                        <h1 class="details-title">Today Attendence Check In:</h1>
-                        <ul>                            
-                            <li>Not Completed</li>
-                        </ul>
+
+            <div class="info">
+                <div class="info-wrapper">
+                    <div class="info-content">
+                        <h1 class="page-title">Attendance<br>Check In</h1>
+                        <img loading="lazy" src="{% static 'images/illustrations/frs.svg' %}" class="info-image" alt="Attendance Information Display" />
                     </div>
                 </div>
             </div>

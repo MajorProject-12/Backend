@@ -55,14 +55,21 @@ def login_view(request):
 
 
 @login_required
+def student_check_in(request):
+    student = request.user.student
+    context = {
+        'student': student,
+    }
+    return render(request, 'student_check_in.html', context)
+
+@login_required
 def student_dashboard(request):
     student = request.user.student
     context = {
         'student': student,
-        'courses': [],
+        # 'courses': [],
     }
     return render(request, 'student_dashboard.html', context)
-
 
 @login_required
 def counselor_dashboard(request):
