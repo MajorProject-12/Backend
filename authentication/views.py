@@ -228,3 +228,11 @@ def update_profile(request):
         return redirect('profile')
 
     return redirect('profile')
+
+@login_required
+def student_statistics(request):
+    student = request.user.student
+    context = {
+        'student': student,
+    }
+    return render(request, 'student_statistics.html', context)

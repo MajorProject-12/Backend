@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Statistics</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/student_statistics.css' %}">
+    <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'js/student_statistics.js' %}"></script>
+
+    <!-- chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body style="background-image: url({% static 'images/Background2.svg' %})">
+    <header>
+        <div class="logo-container">
+            <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
+        </div>
+        <nav class="nav-content">
+            <div class="nav-links">
+                <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
+                <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
+                <a href="#" class="nav-item" id="nav-item2">Statistics</a>
+                <a href="#" class="nav-item" id="nav-item3">Remarks</a>
+                <a href="#" class="nav-item" id="nav-item4">Leave Application</a>
+            </div>
+        </nav>
+
+        <div class="right-container">
+            <div class="notifications" id="notifications">
+                <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
+            </div>
+            <div class="burger-menu" id="burger-menu">
+                <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="notification-dropdown-menu">
+            <h2>Notifications</h2>
+            <a class="menu-item" href="#">Notification 1</a>
+            <a class="menu-item" href="#">Notification 2</a>
+            <a class="menu-item" href="#">Notification 3</a>
+            <div class="footer">
+                <span>View All</span>
+            </div>
+        </div>
+
+        <div class="burger-dropdown" id="burger-dropdown">
+            <h2>Menu</h2>
+            <a class="menu-item" href="student_dashboard.html">Dashboard</a>
+            <a class="menu-item" href="student_check_in.html">Check In</a>
+            <a class="menu-item" href="student_statistics.html">Statistics</a>
+            <a class="menu-item" href="student_remarks.html">Remarks</a>
+            <a class="menu-item" href="student_leave.html">Leave Application</a>
+            <hr>
+            <a class="menu-item" href="student_profile.html">Profile</a>
+            <a class="menu-item" href="student_settings.html">Settings</a>
+            <div class="footer">
+                <a href="student_faqs.html" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}">Sign out</a>
+            </div>
+        </div>
+
+        <div class="profile-container" id="profile-container">
+        <div class="profile" id="profile">
+            <img alt="User  profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+            <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu">
+            <h2>Hello {{ student.user.username }}!</h2>
+            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <a href="student_faqs.html" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}">Sign out</a>
+            </div>
+        </div>
+    </div>
+    </header>
+
+    <div class="content">
+        <div class="group">
+            <div class="container-wrapper">
+                <div class="calendar-container" >
+                    <span class="visually-hidden">Calendar section</span>
+                    <div>Calendar</div>
+                    <img
+                    loading="lazy"
+                    src="{% static 'images/icons/calender.svg' %}"
+                    class="calendar-icon"
+                    alt="Calendar icon"
+                    />
+                </div>
+            
+                <div class="semester-container" >
+                    <label id="semester-label" class="semester-label" for="semester-dropdown">Select semester</label>
+                    <select id="semester-dropdown" class="semester-select">
+                    <option value="">Select</option>
+                    <option value="">1-1</option>
+                    <option value="">1-2</option>
+                    <option value="">2-1</option>
+                    <option value="">2-2</option>
+                    <option value="">3-1</option>
+                    <option value="">3-2</option>
+                    <option value="">4-1</option>
+                    <option value="">4-2</option>
+                    </select>
+                    <img src="{% static 'images/icons/search.png' %}" class="search-icon" alt="search icon" />
+                </div>
+            </div>
+
+            <div class="title-wrapper">
+                <h1 class="page-title">Statistics</h1>
+            </div>
+        </div>
+
+        <main class="content-wrapper">
+
+                <div class="container-1">
+                    <div class="card">
+                        <p>Working Days</p>
+                        <div>
+                            <span class="highlight">66</span><span class="subtext">/80</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <p>Public Holidays</p>
+                        <div>
+                            <span class="highlight">20</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <p>present</p>
+                        <div>
+                            <span class="highlight">64%</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <p>Absent</p>
+                        <div>
+                            <span class="highlight">36%</span>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="attendance-container">
+
+                    <div>
+                        <canvas id="Chart" width="500" height="280"></canvas>
+                    </div>
+
+                    <div class="chart_types">
+                        <button class="BarChart">BarChart</button>
+                        <button class="LineChart">LineChart</button>
+                        <button class="PieChart">PieChart</button>
+                    </div>
+                </div>
+        </main>
+    </div>
+
+</body>
+</html>

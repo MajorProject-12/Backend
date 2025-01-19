@@ -32,7 +32,7 @@
             <div class="nav-links">
                 <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
                 <a href="#" class="nav-item" id="nav-item1">Check In</a>
-                <a href="#" class="nav-item" id="nav-item2">Statistics</a>
+                <a href="{% url 'student_statistics' %}" class="nav-item" id="nav-item2">Statistics</a>
                 <a href="#" class="nav-item" id="nav-item3">Remarks</a>
                 <a href="#" class="nav-item" id="nav-item4">Leave Application</a>
             </div>
@@ -64,7 +64,7 @@
             <a class="menu-item" href="#">Remarks</a>
             <a class="menu-item" href="#">Leave Application</a>
             <hr>
-            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
             <a class="menu-item" href="#">Settings</a>
             <div class="footer">
                 <span>FAQs</span>
@@ -99,7 +99,7 @@
                             <video id="video" autoplay style="display: none;" width="100%" height="100%"></video>
                             <img loading="lazy" src="{% static 'images/icons/face-scan-white.svg' %}" class="scanner-icon" alt="Face Scanner Interface" />
                         </div>
-                        <div class="greeting-text">Hello !</div>
+                        <div class="greeting-text">Hello {{ student.user.username }}!</div>
                         <button class="scan-button">
                             <span>Scan</span>
                             <img loading="lazy" src="{% static 'images/icons/photo-capture.svg' %}" class="scan-icon" alt="" />
