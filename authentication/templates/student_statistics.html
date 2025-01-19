@@ -30,8 +30,8 @@
                 <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
                 <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
                 <a href="#" class="nav-item" id="nav-item2">Statistics</a>
-                <a href="#" class="nav-item" id="nav-item3">Remarks</a>
-                <a href="#" class="nav-item" id="nav-item4">Leave Application</a>
+                <a href="{% url 'student_remarks' %}" class="nav-item" id="nav-item3">Remarks</a>
+                <a href="{% url 'student_leave' %}" class="nav-item" id="nav-item4">Leave Application</a>
             </div>
         </nav>
 
@@ -56,16 +56,16 @@
 
         <div class="burger-dropdown" id="burger-dropdown">
             <h2>Menu</h2>
-            <a class="menu-item" href="student_dashboard.html">Dashboard</a>
-            <a class="menu-item" href="student_check_in.html">Check In</a>
-            <a class="menu-item" href="student_statistics.html">Statistics</a>
-            <a class="menu-item" href="student_remarks.html">Remarks</a>
-            <a class="menu-item" href="student_leave.html">Leave Application</a>
+            <a class="menu-item" href="#">Dashboard</a>
+            <a class="menu-item" href="#">Check In</a>
+            <a class="menu-item" href="#">Statistics</a>
+            <a class="menu-item" href="#">Remarks</a>
+            <a class="menu-item" href="student_leave#">Leave Application</a>
             <hr>
-            <a class="menu-item" href="student_profile.html">Profile</a>
-            <a class="menu-item" href="student_settings.html">Settings</a>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
             <div class="footer">
-                <a href="student_faqs.html" id="faqs"><span>FAQs</span></a>
+                <a href="#" id="faqs"><span>FAQs</span></a>
                 <a href="{% url 'logout' %}">Sign out</a>
             </div>
         </div>
@@ -80,7 +80,7 @@
             <a class="menu-item" href="{% url 'profile' %}">Profile</a>
             <a class="menu-item" href="#">Settings</a>
             <div class="footer">
-                <a href="student_faqs.html" id="faqs"><span>FAQs</span></a>
+                <a href="#" id="faqs"><span>FAQs</span></a>
                 <a href="{% url 'logout' %}">Sign out</a>
             </div>
         </div>

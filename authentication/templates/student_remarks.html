@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student remarks</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/student_remarks.css' %}">
+    <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'js/student_remarks.js' %}"></script>
+</head>
+<body style="background-image: url({% static 'images/Background2.svg' %})">
+    <header>
+        <div class="logo-container">
+            <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
+        </div>
+        <nav class="nav-content">
+            <div class="nav-links">
+                <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
+                <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
+                <a href="{% url 'student_statistics' %}" class="nav-item" id="nav-item2">Statistics</a>
+                <a href="#" class="nav-item" id="nav-item3">Remarks</a>
+                <a href="{% url 'student_leave' %}" class="nav-item" id="nav-item4">Leave Application</a>
+            </div>
+        </nav>
+
+        <div class="right-container">
+            <div class="notifications" id="notifications">
+                <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
+            </div>
+            <div class="burger-menu" id="burger-menu">
+                <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="notification-dropdown-menu">
+            <h2>Notifications</h2>
+            <a class="menu-item" href="#">Notification 1</a>
+            <a class="menu-item" href="#">Notification 2</a>
+            <a class="menu-item" href="#">Notification 3</a>
+            <div class="footer">
+                <span>View All</span>
+            </div>
+        </div>
+
+        <div class="burger-dropdown" id="burger-dropdown">
+            <h2>Menu</h2>
+            <a class="menu-item" href="#">Dashboard</a>
+            <a class="menu-item" href="#">Check In</a>
+            <a class="menu-item" href="#">Statistics</a>
+            <a class="menu-item" href="#">Remarks</a>
+            <a class="menu-item" href="#">Leave Application</a>
+            <hr>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="student_settings#>Settings</a>
+            <div class="footer">
+                <a href="#" id="faqs"><span>FAQs</span></a>
+                <a href="#" id="sign_out">Sign out</a>
+            </div>
+        </div>
+
+        <div class="profile-container" id="profile-container">
+        <div class="profile" id="profile">
+            <img alt="User  profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+            <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu">
+            <h2>Hello {{ student.user.username }}!</h2>
+            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <a href="#" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+            </div>
+        </div>
+    </div>
+    </header>
+
+    <div class="content">
+        <main class="content-wrapper">
+
+                <div class="title-wrapper">
+                    <h1 class="page-title">Remarks</h1>
+                 </div>
+
+                 <div class="section-empty">
+                    <img src="{% static 'images/illustrations/Remarks-empty.png' %}" alt="illustration" class="illustration">
+                    <p class="section-empty-text"><b>Nothing Here !</b></p>
+                 </div>
+                 
+                 <div class="section-remarks">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Date</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>2023-10-01</td>
+                                <td>Your attendance has been very good. This is important for your academic success.</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>2023-10-05</td>
+                                <td>I'm pleased with your consistent attendance in class.</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>2023-10-10</td>
+                                <td>Your attendance has been very good. This is important for your academic success.</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>2023-10-15</td>
+                                <td>Your attendance has been satisfactory this term.</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>2023-10-20</td>
+                                <td>Please make an effort to improve your attendance in the coming weeks.</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>2023-10-25</td>
+                                <td>Attendance is crucial for academic success. Let's work together to improve your attendance.</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>2023-10-30</td>
+                                <td>Your attendance has been satisfactory this term.</td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>2023-11-01</td>
+                                <td>Please make an effort to improve your attendance in the coming weeks.</td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td>2023-11-05</td>
+                                <td>Attendance is crucial for academic success. Let's work together to improve your attendance.</td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td>2023-11-10</td>
+                                <td>I've noticed some absences from your classes. Please let me know if there are any challenges impacting your attendance.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                 
+
+        </main>
+    </div>
+
+</body>
+</html>

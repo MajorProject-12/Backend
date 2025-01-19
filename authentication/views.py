@@ -236,3 +236,19 @@ def student_statistics(request):
         'student': student,
     }
     return render(request, 'student_statistics.html', context)
+
+@login_required
+def student_remarks(request):
+    student = request.user.student
+    context = {
+        'student': student,
+    }
+    return render(request, 'student_remarks.html', context)
+
+@login_required
+def student_leave(request):
+    student = request.user.student
+    context = {
+        'student': student,
+    }
+    return render(request, 'student_leave.html', context)

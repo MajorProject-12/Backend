@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Application</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/student_leave.css' %}">
+    <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'js/student_leave.js' %}"></script>
+</head>
+<body style="background-image: url({% static 'images/Background2.svg' %})">
+    <header>
+        <div class="logo-container">
+            <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
+        </div>
+        <nav class="nav-content">
+            <div class="nav-links">
+                <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
+                <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
+                <a href="{% url 'student_statistics' %}" class="nav-item" id="nav-item2">Statistics</a>
+                <a href="{% url 'student_remarks' %}" class="nav-item" id="nav-item3">Remarks</a>
+                <a href="#" class="nav-item" id="nav-item4">Leave Application</a>
+            </div>
+        </nav>
+
+        <div class="right-container">
+            <div class="notifications" id="notifications">
+                <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
+            </div>
+            <div class="burger-menu" id="burger-menu">
+                <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="notification-dropdown-menu">
+            <h2>Notifications</h2>
+            <a class="menu-item" href="#">Notification 1</a>
+            <a class="menu-item" href="#">Notification 2</a>
+            <a class="menu-item" href="#">Notification 3</a>
+            <div class="footer">
+                <span>View All</span>
+            </div>
+        </div>
+
+        <div class="burger-dropdown" id="burger-dropdown">
+            <h2>Menu</h2>
+            <a class="menu-item" href="#">Dashboard</a>
+            <a class="menu-item" href="#">Check In</a>
+            <a class="menu-item" href="#">Statistics</a>
+            <a class="menu-item" href="#">Remarks</a>
+            <a class="menu-item" href="#">Leave Application</a>
+            <hr>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <a href="#" id="faqs"><span>FAQs</span></a>
+                <a href="#" id="sign_out">Sign out</a>
+            </div>
+        </div>
+
+        <div class="profile-container" id="profile-container">
+        <div class="profile" id="profile">
+            <img alt="User  profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+            <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu">
+            <h2>Hello {{ student.user.username }}!</h2>
+            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <a href="#" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+            </div>
+        </div>
+    </div>
+    </header>
+
+    <div class="content">
+        <main class="content-wrapper">
+            
+            <div class="container-1">
+                <h1>Send Leave Application</h1>
+                <form>
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <div class="input-icon">
+                            <input type="date" id="date" placeholder="YYYY/MM/DD">
+                           
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="days">Number of Days</label>
+                        <input type="number" id="days" placeholder="No. of days">
+                    </div>
+                    <div class="form-group">
+                        <label for="reason">Reason</label>
+                        <textarea id="reason" placeholder="Reason for being absent.........................................................."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Submit</button>
+                        <button type="reset" class="reset-btn">Reset</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="container-2">
+                <h1>Absence records</h1>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Date</th>
+                            <th>Absence reason</th>
+                            <th>Number of Days</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>12/03/2023</td>
+                            <td>Sick</td>
+                            <td>1 day</td>
+                            <td><span class="status pending">Approved</span></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>15/03/2023</td>
+                            <td>Transport issue</td>
+                            <td>1 day</td>
+                            <td><span class="status approved">Approved</span></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>18/03/2023</td>
+                            <td>Heavy Rain</td>
+                            <td>1 day</td>
+                            <td><span class="status approved">Approved</span></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>20/03/2023</td>
+                            <td>Function</td>
+                            <td>4 day</td>
+                            <td><span class="status rejected">Rejected</span></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>22/03/2023</td>
+                            <td>Need to go bank</td>
+                            <td>1 day</td>
+                            <td><span class="status approved">Approved</span></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>25/03/2023</td>
+                            <td>Sick</td>
+                            <td>1 day</td>
+                            <td><span class="status approved">Approved</span></td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>28/03/2023</td>
+                            <td>Aadhar Update</td>
+                            <td>1 day</td>
+                            <td><span class="status approved">Pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="sidebar">
+                <h2>Leave<br>Application</h2>
+                <div class="button-container">                
+                    <button class="new">New</button>
+                    <button class="records">Records</button>
+                </div>
+
+            </div>
+                 
+
+        </main>
+    </div>
+</body>
+</html>

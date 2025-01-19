@@ -1,0 +1,130 @@
+body {
+    background-color: #F8F9FC;
+    font-family: Outfit, sans-serif;
+    background: url("images/Background2.svg") no-repeat top center;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: #000;
+    min-height: 100vh;
+    font-family: sans-serif;
+}
+
+#nav-item3{
+background-color: #8d939d;
+border-radius: 10px;
+border: 10px;
+}
+
+.content{
+    margin: 35px ;
+    border: none;
+    border-radius: 1.5rem;
+    box-shadow: 0px 0px 40px 0px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    background: rgba(248, 249, 252, 0.825);
+    
+}
+
+.content-wrapper{
+    display: flex;
+    flex-direction: column;
+}
+
+.page-title{
+    font-size: 40px;
+    text-align: left;
+    font-family: Outfit, sans-serif;    
+}
+
+.title-wrapper {
+ margin-left: 50px;
+ width: fit-content;
+ float: left;
+}
+
+.illustration{
+    height: 25rem;
+}
+
+.section-empty{
+    display: block;
+    align-self: center;
+    text-align: center;
+    font-size: 25px;
+    font-family: Outfit, sans-serif;
+    margin-top: -100px;
+}
+
+.section-empty-text{
+    margin-top: 0%;
+}
+
+.section-remarks {
+    display: none;
+    width: 90%; 
+    margin: 0 auto;
+    overflow-x: auto; 
+}
+
+.section-remarks table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ddd; 
+    border-radius: 10px; 
+    overflow: hidden; 
+    background-color: #ffffffba; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+
+.section-remarks th, .section-remarks td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd; 
+}
+
+.section-remarks th {
+    background-color: #f2f2f2; 
+    font-weight: bold;
+}
+
+.section-remarks tr:hover {
+    background-color: #ffffffcc; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+
+@media (max-width: 600px) {
+
+body {
+overflow-x: hidden;
+}
+
+.content{
+    margin: 10px;
+}
+
+.illustration{
+    height: 17rem;
+}
+
+.section-empty{
+    margin-top: -20px;
+}
+
+
+.section-remarks {
+    width: 90%; 
+}
+
+.section-remarks table {
+     font-size: 14px;
+}
+
+.section-remarks th, .section-remarks td {
+    padding: 8px;
+}
+
+}
