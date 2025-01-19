@@ -23,9 +23,9 @@
             <div class="nav-links">
                 <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
                 <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
-                <a href="{% url 'student_statistics' %}" class="nav-item" id="nav-item2">Statistics</a>
+                <a href="#" class="nav-item" id="nav-item2">Statistics</a>
                 <a href="{% url 'student_remarks' %}" class="nav-item" id="nav-item3">Remarks</a>
-                <a href="#" class="nav-item" id="nav-item4">Leave Application</a>
+                <a href="{% url 'student_leave' %}" class="nav-item" id="nav-item4">Leave Application</a>
             </div>
         </nav>
 
@@ -60,7 +60,7 @@
             <a class="menu-item" href="#">Settings</a>
             <div class="footer">
                 <a href="#" id="faqs"><span>FAQs</span></a>
-                <a href="#" id="sign_out">Sign out</a>
+                <a href="{% url 'logout' %}">Sign out</a>
             </div>
         </div>
 
@@ -70,12 +70,12 @@
             <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
         </div>
         <div class="dropdown-menu" id="dropdown-menu">
-            <h2>Hello {{ student.user.username }}!</h2>
+            <h2>Hello <br> {{ student.user.username }}!</h2>
             <a class="menu-item" href="{% url 'profile' %}">Profile</a>
             <a class="menu-item" href="#">Settings</a>
             <div class="footer">
                 <a href="#" id="faqs"><span>FAQs</span></a>
-                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+                <a href="{% url 'logout' %}">Sign out</a>
             </div>
         </div>
     </div>
