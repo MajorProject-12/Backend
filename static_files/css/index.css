@@ -1,0 +1,199 @@
+    body {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: #000;
+    font-family: Outfit, sans-serif;
+    min-height: 112vh;
+    }
+
+    header{
+        padding: 15px;
+        margin: 10px;
+        margin-bottom: 30px;
+        margin-top: 10px;
+        width: fit-content;
+    }
+
+    .container {
+        background-color: #fffdfd;
+        padding: 2.25rem 2.0625rem;
+        padding-top: 1.2rem ;
+        padding-right: 3rem;
+        max-width: 90%; /* Set max-width to 90% for responsiveness */
+        width: 330px; /* Set a fixed width for larger screens */
+        border-radius: 1.5rem;
+        border: 2px solid #000;
+        margin-bottom: 20px; 
+        box-shadow: 0px 0px 50px 0px black;
+        position: absolute;
+        top: 1.5rem;
+
+    }       
+
+    main{
+        display: flex;
+        justify-content: center;           
+    }
+
+    footer{
+        background-color: #162D3A;
+        margin: 30px;
+        padding: 20px;
+    }
+
+    .welcome-title {
+    color: #000;
+    letter-spacing: -0.8px;
+    align-self: start;
+    font: 620 40px Outfit, sans-serif;
+    }
+
+    .welcome-subtitle {
+    color: #909090;
+    letter-spacing: -0.52px;
+    margin-top: 26px;
+    margin-bottom: auto;
+    font: 400 18px Outfit, sans-serif;
+    }        
+
+    .form-group {
+    display: flex;
+    flex-direction: column;
+    padding: 0 4px;
+    margin-top: 4px;
+    }
+
+    .input-label {
+    color: #000;
+    letter-spacing: -0.36px;
+    align-self: start;
+    margin-top: 27px;
+    font: 500 18px Inter, sans-serif;
+    }
+
+    .input-field {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    margin-top: 5px;
+    }
+
+    .input-wrapper {
+    align-items: center;
+    border-radius: 8px;
+    border: 1px solid rgba(28, 28, 30, 0.48);
+    background: var(--Light-Background-Transparent, rgba(255, 255, 255, 0));
+    display: flex;
+    width: 100%;
+    gap: 8px;
+    padding: 8px 8px 8px;
+    }
+
+    .input-icon {
+    align-self: stretch;
+    display: flex;
+    align-items: start;
+    gap: 10px;
+    width: 36px;
+    margin: auto 0;
+    padding: 6px;
+    }
+
+    .input-container {
+    align-self: stretch;
+    display: flex;
+    min-width: 240px;
+    flex-direction: column;
+    color: rgba(28, 28, 30, 0.72);
+    justify-content: center;
+    flex: 1;
+    margin: auto 0;
+    padding: 6px 0;
+    font: 400 16px Outfit, sans-serif;
+    border: none;
+    }
+
+    .input-container:focus {
+    border: none; /* Remove the border when focused */
+    outline: none; /* Remove the default outline */
+    }
+
+    .remember-forgot {
+    display: flex;
+    margin-top: 24px;
+    width: 104%;
+    gap: 15px;
+    letter-spacing: -0.32px;
+    justify-content: space-between;
+    align-items: center;
+    font: 16px Outfit, sans-serif;
+    }
+
+    .remember-option {
+    display: flex;
+    gap: 12px;
+    color: #000;
+    font-weight: 500;
+    align-items: center;
+    }
+
+    .checkbox {
+    border-radius: 4px;
+    background-color: #fff;
+    display: flex;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #E2E6ED;
+    }
+
+    .forgot-link {
+    color: #909090;
+    font-weight: 400;
+    text-align: right;
+    }
+
+    .submit-button {
+    align-self: stretch;
+    border-radius: 12px;
+    background-color: #162D3A;
+    color: #fff;
+    text-align: center;
+    letter-spacing: 0.2px;
+    margin: 29px 11px 0 10px;
+    padding: 16px;
+    width: 100%;
+    font: 400 20px/1 Outfit, sans-serif;
+    border: none;
+    cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+
+    .container {
+        width: 72%; 
+        padding: 1.5rem;
+        padding-right: 2.4rem; 
+        position: static;
+    }
+
+    .welcome-title {
+        font-size: 28px; 
+    }
+
+    .welcome-subtitle {
+        font-size: 16px; 
+    }
+
+    .input-label {
+        font-size: 16px; 
+    }
+    .input-container{
+        min-width: 150px;
+    }
+    .submit-button {
+        padding: 12px;
+        font-size: 18px; 
+    }
+}
+    
