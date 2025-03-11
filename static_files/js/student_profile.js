@@ -107,3 +107,110 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 50);
     }
 });
+
+// student_profile.js
+class FaceRegistration {
+    constructor() {
+        this.video = document.getElementById('video');
+        this.scanButton = document.querySelector('.scan-button-main');
+        this.greetingContainer = document.querySelector('.greeting-text');
+        this.scannerIcon = document.querySelector('.scanner-icon');
+        this.stream = null;
+        this.processingTimer = null;
+        this.isRegistering = false;
+
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        this.scanButton.addEventListener('click', () => {
+            if (!this.isRegistering) {
+                this.startRegistration();
+            }
+        });
+    }
+
+    updateMessage(message, username) {
+        this.greetingContainer.innerHTML = `${message}${username ? `<br>${username}` : ''}`;
+    }
+
+    async startRegistration() {
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            this.video.srcObject = this.stream;
+            this.video.style.display = 'block';
+            this.scannerIcon.style.display = 'none';
+            this.isRegistering = true;
+
+            // Start processing frames
+            this.processFrames();
+
+        } catch (error) {
+            console.error("Camera access error:", error);
+            this.updateMessage("Camera access denied. Please check permissions.");
+        }
+    }
+
+    async processFrames() {
+        if (!this.isRegistering) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = this.video.videoWidth;
+        canvas.height = this.video.videoHeight;
+        const ctx = canvas.getContext('2d');
+
+        const processFrame = async () => {
+            if (!this.isRegistering) return;
+
+            ctx.drawImage(this.video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            try {
+                const response = await fetch('/api/process-registration/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image: imageData })
+                });
+
+                const result = await response.json();
+
+                if (result.completed) {
+                    this.updateMessage("Registration Successful!", result.username);
+                    document.querySelector('.face-recognition-section span').innerHTML =
+                        '<b>Face Recognition:</b> Registered';
+                    this.stopRegistration();
+
+                    setTimeout(() => {
+                        document.querySelector('.close-button').click();
+                    }, 2000);
+                } else {
+                    this.updateMessage(result.message, result.username);
+                    requestAnimationFrame(processFrame);
+                }
+            } catch (error) {
+                console.error('Processing error:', error);
+                this.updateMessage("Registration failed. Please try again.");
+                this.stopRegistration();
+            }
+        };
+
+        requestAnimationFrame(processFrame);
+    }
+
+    stopRegistration() {
+        this.isRegistering = false;
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+        }
+        this.video.srcObject = null;
+        this.video.style.display = 'none';
+        this.scannerIcon.style.display = 'block';
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    new FaceRegistration();
+});

@@ -84,24 +84,24 @@ WSGI_APPLICATION = 'majorproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://majorproject_user:CZTMTRNb24jUGjIc5CTisAV6tAzfjqFf@dpg-cu7156dumphs73d1ip6g-a.oregon-postgres.render.com/majorproject',
-        conn_max_age=600,
-    )
-}
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default='postgresql://majorproject_user:CZTMTRNb24jUGjIc5CTisAV6tAzfjqFf@dpg-cu7156dumphs73d1ip6g-a.oregon-postgres.render.com/majorproject',
+#         conn_max_age=600,
+#     )
+# }
 
 # postgresql://majorproject_user:CZTMTRNb24jUGjIc5CTisAV6tAzfjqFf@dpg-cu7156dumphs73d1ip6g-a.oregon-postgres.render.com/majorproject
 
-# DATABASES = {
-# 	'default': {
-# 		'ENGINE': 'django.db.backends.mysql',
-# 		'NAME': 'Major_Project',
-#         'USER': 'root',
-#         'PASSWORD': 'sarath',
-# 		'HOST':'localhost',
-# 	}
-# }
+DATABASES = {
+	'default': {
+		'ENGINE': 'django.db.backends.mysql',
+		'NAME': 'Major_Project',
+        'USER': 'root',
+        'PASSWORD': 'sarath',
+		'HOST':'localhost',
+	}
+}
 
 
 # Password validation

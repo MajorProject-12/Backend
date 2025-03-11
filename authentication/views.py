@@ -9,6 +9,10 @@ from django.contrib.auth.decorators import login_required
 from django.utils.text import capfirst
 from django.contrib import messages
 
+#############################################################
+#                   Student Views                           #
+#############################################################
+
 def login_view(request):
     if request.method == 'POST':
         role = request.POST.get('role')
@@ -27,7 +31,7 @@ def login_view(request):
                 # Handle remember me
                 if remember_me:
                     # Set session expiry to 30 days
-                    request.session.set_expiry(30 * 24 * 60 * 60)  # 30 days in seconds
+                    request.session.set_expiry(30 * 24 * 60 * 60)
                 else:
                     # Set session expiry to 0 (until browser closes)
                     request.session.set_expiry(0)
@@ -36,16 +40,7 @@ def login_view(request):
                 return redirect('student_dashboard')
 
             elif role == 'Counselor' and hasattr(user, 'counselor'):
-                login(request, user)
-
-                # Handle remember me
-                if remember_me:
-                    request.session.set_expiry(30 * 24 * 60 * 60)
-                else:
-                    request.session.set_expiry(0)
-
-                messages.success(request, "Login successful! Welcome, Counselor.")
-                return redirect('counselor_dashboard')
+                messages.error(request, "You selected Counselor role. Please use the counselor login route.")
             else:
                 messages.error(request, "Invalid role selected for your account.")
         else:
@@ -62,23 +57,15 @@ def student_check_in(request):
     }
     return render(request, 'student_check_in.html', context)
 
+
 @login_required
 def student_dashboard(request):
     student = request.user.student
     context = {
         'student': student,
-        # 'courses': [],
+        # 'courses': [],  # Uncomment if courses are used
     }
     return render(request, 'student_dashboard.html', context)
-
-@login_required
-def counselor_dashboard(request):
-    counselor = request.user.counselor
-    context = {
-        'counselor': counselor,
-        'assigned_students': counselor.assigned_students.all(),
-    }
-    return render(request, 'counselor_dashboard.html', context)
 
 
 def logout_view(request):
@@ -86,6 +73,7 @@ def logout_view(request):
     logout(request)
     messages.info(request, "You have been logged out successfully.")
     return redirect('login')
+
 
 def generate_otp():
     """Generate a 6-digit OTP"""
@@ -129,7 +117,7 @@ def forgotpassword(request):
                     request.session['email'] = email
                     # Update the stage to 'otp'
                     request.session['stage'] = 'otp'
-                    current_stage = 'otp'  # Update current stage
+                    current_stage = 'otp'
                     messages.success(request, 'OTP has been sent to your email.')
                 else:
                     messages.error(request, 'Failed to send OTP. Please try again.')
@@ -143,7 +131,7 @@ def forgotpassword(request):
             if stored_otp and user_otp == stored_otp:
                 # Update stage to password
                 request.session['stage'] = 'password'
-                current_stage = 'password'  # Update current stage
+                current_stage = 'password'
                 messages.success(request, 'OTP verified successfully. Please enter your new password.')
             else:
                 messages.error(request, 'Invalid OTP. Please try again.')
@@ -202,6 +190,7 @@ def profile_view(request):
         messages.error(request, "Error loading profile data.")
         return render(request, 'student_profile.html', {'error': str(e)})
 
+
 @login_required
 def update_profile(request):
     if request.method == 'POST':
@@ -229,13 +218,20 @@ def update_profile(request):
 
     return redirect('profile')
 
+
 @login_required
 def student_statistics(request):
-    student = request.user.student
+    student = getattr(request.user, 'student', None)  # Safely get student object
+
+    if student is None:
+        messages.error(request, "Student data not found.")
+        return redirect('student_dashboard')
+
     context = {
         'student': student,
     }
     return render(request, 'student_statistics.html', context)
+
 
 @login_required
 def student_remarks(request):
@@ -245,6 +241,7 @@ def student_remarks(request):
     }
     return render(request, 'student_remarks.html', context)
 
+
 @login_required
 def student_leave(request):
     student = request.user.student
@@ -252,3 +249,35 @@ def student_leave(request):
         'student': student,
     }
     return render(request, 'student_leave.html', context)
+
+
+@login_required
+def student_weekly_report(request):
+    student = request.user.student
+    context = {
+        'student': student,
+    }
+    return render(request, 'student_weekly_reports.html', context)
+
+
+#############################################################
+#                  Counselor Views                          #
+#############################################################
+
+@login_required
+def counselor_dashboard(request):
+    counselor = request.user.counselor
+    context = {
+        'counselor': counselor,
+        'assigned_students': counselor.assigned_students.all(),
+    }
+    return render(request, 'counselor_dashboard.html', context)
+
+@login_required
+def student_insights(request):
+    counselor = request.user.counselor
+    context = {
+        'counselor': counselor,
+        'assigned_students': counselor.assigned_students.all(),
+    }
+    return render(request, 'counselor_dashboard.html', context)
