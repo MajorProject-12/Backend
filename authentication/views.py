@@ -27,20 +27,22 @@ def login_view(request):
             # Check role and redirect based on it
             if role == 'Student' and hasattr(user, 'student'):
                 login(request, user)
-
-                # Handle remember me
                 if remember_me:
-                    # Set session expiry to 30 days
-                    request.session.set_expiry(30 * 24 * 60 * 60)
+                    request.session.set_expiry(30 * 24 * 60 * 60)  # 30 days
                 else:
-                    # Set session expiry to 0 (until browser closes)
                     request.session.set_expiry(0)
-
                 messages.success(request, "Login successful! Welcome, Student.")
                 return redirect('student_dashboard')
 
             elif role == 'Counselor' and hasattr(user, 'counselor'):
-                messages.error(request, "You selected Counselor role. Please use the counselor login route.")
+                login(request, user)
+                if remember_me:
+                    request.session.set_expiry(30 * 24 * 60 * 60)
+                else:
+                    request.session.set_expiry(0)
+                messages.success(request, "Login successful! Welcome, Counselor.")
+                return redirect('counselor_dashboard')
+
             else:
                 messages.error(request, "Invalid role selected for your account.")
         else:
@@ -88,13 +90,7 @@ def send_otp_email(email, otp):
     recipient_list = [email]
 
     try:
-        send_mail(
-            subject,
-            message,
-            from_email,
-            recipient_list,
-            fail_silently=False,
-        )
+        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
         return True
     except Exception as e:
         print(f"Error sending email: {e}")
@@ -115,7 +111,6 @@ def forgotpassword(request):
                     # Store the OTP and email in session
                     request.session['otp'] = otp
                     request.session['email'] = email
-                    # Update the stage to 'otp'
                     request.session['stage'] = 'otp'
                     current_stage = 'otp'
                     messages.success(request, 'OTP has been sent to your email.')
@@ -129,7 +124,6 @@ def forgotpassword(request):
             stored_otp = request.session.get('otp')
 
             if stored_otp and user_otp == stored_otp:
-                # Update stage to password
                 request.session['stage'] = 'password'
                 current_stage = 'password'
                 messages.success(request, 'OTP verified successfully. Please enter your new password.')
@@ -146,7 +140,6 @@ def forgotpassword(request):
                     user = CustomUser.objects.get(email=email)
                     user.set_password(new_password1)
                     user.save()
-                    # Clear session data
                     request.session.flush()
                     messages.success(request, 'Password changed successfully. Please login with your new password.')
                     return redirect('login')
@@ -198,65 +191,49 @@ def update_profile(request):
         user = request.user
 
         try:
-            # Update user fields
             user.username = request.POST.get('username')
             user.email = request.POST.get('email')
             user.save()
-
-            # Update student fields
             student.branch = request.POST.get('branch')
             student.year = int(request.POST.get('year'))
             student.semester = int(request.POST.get('semester'))
             student.gender = request.POST.get('gender')
             student.save()
-
             messages.success(request, 'Profile updated successfully!')
         except Exception as e:
             messages.error(request, f'Error updating profile: {str(e)}')
-
         return redirect('profile')
-
     return redirect('profile')
 
 
 @login_required
 def student_statistics(request):
-    student = getattr(request.user, 'student', None)  # Safely get student object
-
+    student = getattr(request.user, 'student', None)
     if student is None:
         messages.error(request, "Student data not found.")
         return redirect('student_dashboard')
-
-    context = {
-        'student': student,
-    }
+    context = {'student': student}
     return render(request, 'student_statistics.html', context)
 
 
 @login_required
 def student_remarks(request):
     student = request.user.student
-    context = {
-        'student': student,
-    }
+    context = {'student': student}
     return render(request, 'student_remarks.html', context)
 
 
 @login_required
 def student_leave(request):
     student = request.user.student
-    context = {
-        'student': student,
-    }
+    context = {'student': student}
     return render(request, 'student_leave.html', context)
 
 
 @login_required
 def student_weekly_report(request):
     student = request.user.student
-    context = {
-        'student': student,
-    }
+    context = {'student': student}
     return render(request, 'student_weekly_reports.html', context)
 
 
@@ -273,6 +250,7 @@ def counselor_dashboard(request):
     }
     return render(request, 'counselor_dashboard.html', context)
 
+
 @login_required
 def student_insights(request):
     counselor = request.user.counselor
@@ -280,4 +258,28 @@ def student_insights(request):
         'counselor': counselor,
         'assigned_students': counselor.assigned_students.all(),
     }
-    return render(request, 'counselor_dashboard.html', context)
+    return render(request, 'counselor_insights.html', context)
+
+@login_required
+def counselor_leave(request):
+    counselor = request.user.counselor
+    context = {
+        'counselor': counselor,
+    }
+    return render(request, 'counselor_leave.html', context)
+
+@login_required
+def counselor_leave(request):
+    counselor = request.user.counselor
+    context = {
+        'counselor': counselor,
+    }
+    return render(request, 'counselor_leave.html', context)
+
+@login_required
+def counselor_weekly_reports(request):
+    counselor = request.user.counselor
+    context = {
+        'counselor': counselor,
+    }
+    return render(request, 'counselor_weekly_reports.html', context)

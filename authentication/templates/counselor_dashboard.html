@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/counselor_dashboard.css' %}">
     <script src="{% static 'js/header.js' %}"></script>
-
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
     <header>
@@ -22,8 +21,10 @@
         <nav class="nav-content">
             <div class="nav-links">
                 <a href="#" class="nav-item" id="nav-item0">Dashboard</a>
-                <a href="#" class="nav-item" id="nav-item1">Manage Students</a>
-                <a href="#" class="nav-item" id="nav-item2">Attendence Statistics</a>
+                <!-- <a href="#" class="nav-item" id="nav-item1">Manage Students</a> -->
+                <a href="{% url 'student_insights' %}" class="nav-item" id="nav-item1">Student Insights</a>
+                <a href="{% url 'counselor_leave' %}" class="nav-item" id="nav-item2">Leave Applications</a>
+                <a href="{% url 'counselor_weekly_reports' %}" class="nav-item" id="nav-item3">Weekly Reports</a>
             </div>
         </nav>
 
