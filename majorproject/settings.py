@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'attendance.apps.AttendanceConfig',
     'leave.apps.LeaveConfig',
     'remarks.apps.RemarksConfig',
-    'reports.apps.ReportsConfig'
+    'reports.apps.ReportsConfig',
+    'attendance_statistics.apps.AttendanceStatisticsConfig',
 ]
 
 MIDDLEWARE = [
@@ -63,7 +64,7 @@ ROOT_URLCONF = 'majorproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

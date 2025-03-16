@@ -1,19 +1,21 @@
+<!--counselor_weekly_reports.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   {% load static %}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leave Applications</title>
+  <title>Weekly Reports</title>
+  <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Note: Adjust font weight range if needed -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   <link rel="stylesheet" href="{% static 'css/header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/counselor_leave.css' %}">
+  <link rel="stylesheet" href="{% static 'css/counselor_weekly_reports.css' %}">
   <script src="{% static 'js/header.js' %}"></script>
-  <script src="{% static 'js/counselor_leave.js' %}"></script>
+  <script src="{% static 'js/counselor_weekly_reports.js' %}"></script>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
   <header>
@@ -25,8 +27,8 @@
         <a href="{% url 'counselor_dashboard' %}" class="nav-item" id="nav-item0">Dashboard</a>
         <!-- <a href="#" class="nav-item" id="nav-item1">Manage Students</a> -->
         <a href="{% url 'student_insights' %}" class="nav-item" id="nav-item1">Student Insights</a>
-        <a href="#" class="nav-item" id="nav-item2">Leave Applications</a>
-        <a href="{% url 'counselor_weekly_reports' %}" class="nav-item" id="nav-item3">Weekly Reports</a>
+        <a href="{% url 'counselor_leave' %}" class="nav-item" id="nav-item2">Leave Applications</a>
+        <a href="#" class="nav-item" id="nav-item3">Weekly Reports</a>
       </div>
     </nav>
 
@@ -85,10 +87,10 @@
   <div class="content">
     <main class="content-wrapper">
       <div class="sidebar">
-        <h2>Leave<br>Applications</h2>
+        <h2>Weekly<br>Reports</h2>
         <div class="button-container">
           <button class="new">New</button>
-          <button class="records">Records</button>
+          <button class="records">Archive</button>
         </div>
       </div>
 
@@ -129,14 +131,7 @@
       </div>
 
       <div class="container-1">
-        <div class="info">
-          <h1>Today's Leave Applications</h1>
-          <div class="tooltip">
-            <!-- Info icon loaded directly from HTML -->
-            <img src="{% static 'images/icons/info.svg' %}" alt="info" height="20px">
-            <span class="tooltiptext">Data modifications are allowed only within 15 minutes from the initial change.</span>
-          </div>
-        </div>
+        <h1>This week Reports</h1>
         <table>
           <thead>
             <tr>
@@ -144,57 +139,37 @@
               <th>Date</th>
               <th>Roll No</th>
               <th>Student Name</th>
-              <th>Absence reason</th>
-              <th>Number of Days</th>
-              <th>Status</th>
-              <th>Operations</th>
+              <th>Work Done</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>1</td>
               <td>12/03/2023</td>
-              <td>21bq1a4201</td>
+              <td>21bq1a4200</td>
               <td>Rohit</td>
-              <td>Sick</td>
-              <td>1 day</td>
-              <td><span class="status pending">Pending</span></td>
-              <!-- Pre-populated operations cell with images loaded from HTML -->
-              <td class="operations">
-                <div class="operations-1">
-                  <button class="approve" title="Approve">
-                    <img src="{% static 'images/icons/Approve.svg' %}" alt="Approve">
-                  </button>
-                  <button class="reject" title="Reject">
-                    <img src="{% static 'images/icons/Reject.svg' %}" alt="Reject">
-                  </button>
-                </div>
-              </td>
+              <td>1. Completed course on Java 2. Currently doing Python course</td>
             </tr>
             <tr>
               <td>2</td>
-              <td>15/03/2023</td>
-              <td>21bq1a4227</td>
+              <td>12/03/2023</td>
+              <td>21bq1a4220</td>
+              <td>Rohan</td>
+              <td>1. Participated in coding challenge 2. Working on personal project</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>12/03/2023</td>
+              <td>21bq1a4233</td>
               <td>Naveen</td>
-              <td>Transport issue</td>
-              <td>1 day</td>
-              <td><span class="status approved">Approved</span></td>
-              <!-- Operations cell (can be empty if status is approved) -->
-              <td class="operations">
-                <div class="operations-2">
-                  <button class="reset" title="Reset">
-                    <img src="{% static 'images/icons/Reset-status.svg' %}" alt="Reset">
-                  </button>
-                  Reset
-                </div>
-              </td>
+              <td>1. Completed assignment on Data Structures 2. Started learning Machine Learning</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <div class="container-2">
-        <h1>Absence records</h1>
+        <h1>Reports Archive</h1>
         <table>
           <thead>
             <tr>
@@ -202,29 +177,58 @@
               <th>Date</th>
               <th>Roll No</th>
               <th>Student Name</th>
-              <th>Absence reason</th>
-              <th>Number of Days</th>
-              <th>Status</th>
+              <th>Work Done</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>1</td>
               <td>12/03/2023</td>
-              <td>21bq1a4208</td>
-              <td>Rohan</td>
-              <td>Sick</td>
-              <td>1 day</td>
-              <td><span class="status pending">Approved</span></td>
+              <td>21bq1a4200</td>
+              <td>Rohit</td>
+              <td>1. Completed course on Java 2. Currently doing Python course</td>
             </tr>
             <tr>
               <td>2</td>
-              <td>15/03/2023</td>
-              <td>21bq1a4223</td>
+              <td>19/03/2023</td>
+              <td>21bq1a4220</td>
+              <td>Rohan</td>
+              <td>1. Participated in coding challenge 2. Working on personal project</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>26/03/2023</td>
+              <td>21bq1a4233</td>
+              <td>Naveen</td>
+              <td>1. Completed assignment on Data Structures 2. Started learning Machine Learning</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>02/04/2023</td>
+              <td>21bq1a4211</td>
               <td>Akash</td>
-              <td>Transport issue</td>
-              <td>1 day</td>
-              <td><span class="status approved">Approved</span></td>
+              <td>1. Attended seminar on Artificial Intelligence 2. Working on group project</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>09/04/2023</td>
+              <td>21bq1a4222</td>
+              <td>Abhishek</td>
+              <td>1. Completed course on Web Development 2. Currently doing internship</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>16/04/2023</td>
+              <td>21bq1a4234</td>
+              <td>Aditya</td>
+              <td>1. Participated in hackathon 2. Working on personal blog</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>23/04/2023</td>
+              <td>21bq1a4215</td>
+              <td>Amit</td>
+              <td>1. Completed assignment on Algorithms 2. Started learning Cloud Computing</td>
             </tr>
           </tbody>
         </table>

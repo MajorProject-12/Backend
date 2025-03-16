@@ -1,3 +1,4 @@
+<!--counselor_insights.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,6 +32,7 @@
                 <a href="#" class="nav-item" id="nav-item1">Student Insights</a>
                 <a href="{% url 'counselor_leave' %}" class="nav-item" id="nav-item2">Leave Applications</a>
                 <a href="{% url 'counselor_weekly_reports' %}" class="nav-item" id="nav-item3">Weekly Reports</a>
+                <a href="{% url 'counselor_remarks' %}" class="nav-item" id="nav-item4">Student Remarks</a>
             </div>
         </nav>
 
@@ -55,11 +57,12 @@
 
         <div class="burger-dropdown" id="burger-dropdown">
             <h2>Menu</h2>
-            <a class="menu-item" href="counselor_dashboard.html">Dashboard</a>
+            <a class="menu-item" href="{% url 'counselor_dashboard' %}">Dashboard</a>
             <!-- <a class="menu-item" href="#">Manage Students</a> -->
-            <a class="menu-item" href="counselor_insights.html">Student Insights</a>
-            <a class="menu-item" href="counselor_leave.html">Leave Applications</a>
-            <a class="menu-item" href="counselor_weekly_reports.html">Weekly Reports</a>
+            <a class="menu-item" href="{% url 'counselor_insights' %}">Student Insights</a>
+            <a class="menu-item" href="{% url 'counselor_leave' %}">Leave Applications</a>
+            <a class="menu-item" href="{% url 'counselor_weekly_reports' %}">Weekly Reports</a>
+            <a class="menu-item" href="{% url 'counselor_remarks' %}">Student Remarks</a>
             <hr>
             <a class="menu-item" href="#">Profile</a>
             <a class="menu-item" href="counselor_settings.html">Settings</a>
@@ -117,21 +120,23 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for student in students %}
                         <tr>
-                            <td>1</td>
-                            <td>21bq1a4201</td>
-                            <td>Rohit</td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ student.roll_number }}</td>
+                            <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
                             <td>80%</td>
-                            <td></td>
+                            <td>
+                                <a href="{% url 'counselor_remarks' %}?student_id={{ student.roll_number }}" class="btn-add-remark">
+                                    <i class="fas fa-comment-alt"></i> Add Remark
+                                </a>
+                            </td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td>2</td>
-                            <td>21bq1a4227</td>
-                            <td>Naveen</td>
-                            <td>71%</td>
-                            <td></td>
+                            <td colspan="5">No students assigned to you yet.</td>
                         </tr>
-
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
