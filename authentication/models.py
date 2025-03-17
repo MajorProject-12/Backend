@@ -1,9 +1,6 @@
-# authentication/models
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
-
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
@@ -49,9 +46,9 @@ class Student(models.Model):
         ('ECE', 'Electronics and Communication Engineering'),
         ('CSE', 'Computer Science Engineering'),
         ('INF', 'Information Technology'),
-        ('CSM', 'Computer Science - Artificial Intelligence and Machine Learning'),
-        ('CSO', 'Computer Science - Internet of Things'),
-        ('CIC', 'Computer Science - Internet of Things & Cybersecurity'),
+        ('CSM', 'Computer Science - AI & ML'),
+        ('CSO', 'Computer Science - IoT'),
+        ('CIC', 'Computer Science - Cybersecurity'),
         ('AIM', 'Artificial Intelligence and Machine Learning'),
         ('AID', 'Artificial Intelligence and Data Science'),
     ]
@@ -63,6 +60,8 @@ class Student(models.Model):
     semester = models.IntegerField(choices=SEMESTER_CHOICES)
     section = models.CharField(max_length=1, choices=SECTION_CHOICES)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    attendance_percentage = models.FloatField(default=0.0)  # ✅ New Field
+
     counselor = models.ForeignKey(
         'Counselor',
         on_delete=models.SET_NULL,
@@ -75,19 +74,7 @@ class Student(models.Model):
 
 
 class Counselor(models.Model):
-    BRANCH_CHOICES = [
-        ('CIV', 'Civil Engineering'),
-        ('EEE', 'Electrical and Electronics Engineering'),
-        ('MEC', 'Mechanical Engineering'),
-        ('ECE', 'Electronics and Communication Engineering'),
-        ('CSE', 'Computer Science Engineering'),
-        ('INF', 'Information Technology'),
-        ('CSM', 'Computer Science - Artificial Intelligence and Machine Learning'),
-        ('CSO', 'Computer Science - Internet of Things'),
-        ('CIC', 'Computer Science - Internet of Things & Cybersecurity'),
-        ('AIM', 'Artificial Intelligence and Machine Learning'),
-        ('AID', 'Artificial Intelligence and Data Science'),
-    ]
+    BRANCH_CHOICES = Student.BRANCH_CHOICES  # ✅ Avoid duplicate BRANCH_CHOICES
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     branch = models.CharField(max_length=3, choices=BRANCH_CHOICES)
