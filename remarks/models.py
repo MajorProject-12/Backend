@@ -1,3 +1,4 @@
+# remarks/models.py
 from django.db import models
 
 class StudentRemark(models.Model):

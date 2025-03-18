@@ -1,7 +1,7 @@
-from tkinter.font import names
+# authentication/urls.py
 
-from django.urls import path
 from . import views
+from django.urls import path
 
 urlpatterns = [
     path('', views.login_view, name='login'),
@@ -20,8 +20,7 @@ urlpatterns = [
 
     # Counselor URLs
     path('counselor_dashboard/', views.counselor_dashboard, name='counselor_dashboard'),
-    path('student_insights/', views.student_insights, name='student_insights'),
+    path('student_insights/', views.student_insights, name='counselor_insights'),
     path('counselor_leave/', views.counselor_leave, name='counselor_leave'),
     path('counselor_weekly_reports/', views.counselor_weekly_reports, name='counselor_weekly_reports'),
-
 ]

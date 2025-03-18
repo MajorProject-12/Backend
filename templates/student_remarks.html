@@ -1,3 +1,4 @@
+<!--templates/student_remarks.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/student_remarks.css' %}">
     <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'js/student_remarks.js' %}"></script>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
     <header>
@@ -69,8 +71,19 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <!-- Add this right after your table div -->
+                <div class="section-empty" style="display: none;">
+                  <p>No remarks available at this time.</p>
+                </div>
             </div>
         </main>
     </div>
+<!--    &lt;!&ndash; Add this right below <div class="content"> &ndash;&gt;-->
+<!--    <div style="background-color: yellow; padding: 10px;">-->
+<!--        DEBUG: Found {{ remarks.count }} remarks.-->
+<!--        {% for r in remarks %}-->
+<!--            <p>{{ r.date }}: {{ r.remarks }}</p>-->
+<!--        {% endfor %}-->
+<!--    </div>-->
 </body>
 </html>

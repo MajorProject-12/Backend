@@ -29,7 +29,7 @@
                 <a href="#" class="nav-item" id="nav-item1">Student Insights</a>
                 <a href="{% url 'counselor_leave' %}" class="nav-item" id="nav-item2">Leave Applications</a>
                 <a href="{% url 'counselor_weekly_reports' %}" class="nav-item" id="nav-item3">Weekly Reports</a>
-                <a href="{% url 'counselor_remarks' %}" class="nav-item" id="nav-item4">Student Remarks</a>
+<!--                <a href="{% url 'counselor_insights' %}" class="nav-item" id="nav-item4">Student Remarks</a>-->
             </div>
         </nav>
         <div class="right-container">
@@ -94,7 +94,7 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ student.roll_number }}</td>
-                            <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                            <td>{{ student.user.username }}</td>
                             <td>{{ student.latest_attendance }}</td>
                             <td>
                                 <!-- Clicking the button will display the inline remark form -->
