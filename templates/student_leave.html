@@ -1,4 +1,4 @@
-<!--student_leave.html-->
+<!--templates/leave/student_leave.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +28,6 @@
                 <a href="{% url 'student_remarks' %}" class="nav-item" id="nav-item3">Remarks</a>
                 <a href="{% url 'student_leave' %}" class="nav-item" id="nav-item4">Leave Application</a>
                 <a href="{% url 'student_weekly_reports' %}" class="nav-item" id="nav-item5">Weekly Report</a>
-
             </div>
         </nav>
 
@@ -53,13 +52,13 @@
 
         <div class="burger-dropdown" id="burger-dropdown">
             <h2>Menu</h2>
-            <a class="menu-item" href="#">Dashboard</a>
-            <a class="menu-item" href="#">Check In</a>
+            <a class="menu-item" href="{% url 'student_dashboard' %}">Dashboard</a>
+            <a class="menu-item" href="{% url 'student_check_in' %}">Check In</a>
             <a class="menu-item" href="#">Statistics</a>
-            <a class="menu-item" href="#">Remarks</a>
-            <a class="menu-item" href="#">Leave Application</a>
+            <a class="menu-item" href="{% url 'student_remarks' %}">Remarks</a>
+            <a class="menu-item" href="{% url 'student_leave' %}">Leave Application</a>
             <hr>
-            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
             <a class="menu-item" href="#">Settings</a>
             <div class="footer">
                 <a href="#" id="faqs"><span>FAQs</span></a>
@@ -68,42 +67,42 @@
         </div>
 
         <div class="profile-container" id="profile-container">
-        <div class="profile" id="profile">
-            <img alt="User  profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
-            <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
-        </div>
-        <div class="dropdown-menu" id="dropdown-menu">
-            <h2>Hello <br> {{ student.user.username }}!</h2>
-            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
-            <a class="menu-item" href="#">Settings</a>
-            <div class="footer">
-                <a href="#" id="faqs"><span>FAQs</span></a>
-                <a href="{% url 'logout' %}">Sign out</a>
+            <div class="profile" id="profile">
+                <img alt="User profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+                <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu">
+                <h2>Hello <br> {{ student.user.username }}!</h2>
+                <a class="menu-item" href="{% url 'profile' %}">Profile</a>
+                <a class="menu-item" href="#">Settings</a>
+                <div class="footer">
+                    <a href="#" id="faqs"><span>FAQs</span></a>
+                    <a href="{% url 'logout' %}">Sign out</a>
+                </div>
             </div>
         </div>
-    </div>
     </header>
 
     <div class="content">
         <main class="content-wrapper">
-            
+
             <div class="container-1">
                 <h1>Send Leave Application</h1>
-                <form>
+                <form method="POST" action="{% url 'student_leave' %}">
+                    {% csrf_token %}
                     <div class="form-group">
                         <label for="date">Date</label>
                         <div class="input-icon">
-                            <input type="date" id="date" placeholder="YYYY/MM/DD">
-                           
+                            <input type="date" id="date" name="date" placeholder="YYYY/MM/DD" required>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="days">Number of Days</label>
-                        <input type="number" id="days" placeholder="No. of days">
+                        <input type="number" id="days" name="days" placeholder="No. of days" required min="1">
                     </div>
                     <div class="form-group">
                         <label for="reason">Reason</label>
-                        <textarea id="reason" placeholder="Reason for being absent.........................................................."></textarea>
+                        <textarea id="reason" name="reason" placeholder="Reason for being absent.........................................................." required></textarea>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="submit-btn">Submit</button>
@@ -125,69 +124,30 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for record in leave_records %}
                         <tr>
-                            <td>1</td>
-                            <td>12/03/2023</td>
-                            <td>Sick</td>
-                            <td>1 day</td>
-                            <td><span class="status pending">Approved</span></td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ record.date|date:"d/m/Y" }}</td>
+                            <td>{{ record.reason }}</td>
+                            <td>{{ record.no_of_days }} day{% if record.no_of_days > 1 %}s{% endif %}</td>
+                            <td><span class="status {{ record.status|lower }}">{{ record.status }}</span></td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td>2</td>
-                            <td>15/03/2023</td>
-                            <td>Transport issue</td>
-                            <td>1 day</td>
-                            <td><span class="status approved">Approved</span></td>
+                            <td colspan="5" class="text-center">No leave records found.</td>
                         </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>18/03/2023</td>
-                            <td>Heavy Rain</td>
-                            <td>1 day</td>
-                            <td><span class="status approved">Approved</span></td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td>20/03/2023</td>
-                            <td>Function</td>
-                            <td>4 day</td>
-                            <td><span class="status rejected">Rejected</span></td>
-                        </tr>
-                        <tr>
-                            <td>5</td>
-                            <td>22/03/2023</td>
-                            <td>Need to go bank</td>
-                            <td>1 day</td>
-                            <td><span class="status approved">Approved</span></td>
-                        </tr>
-                        <tr>
-                            <td>6</td>
-                            <td>25/03/2023</td>
-                            <td>Sick</td>
-                            <td>1 day</td>
-                            <td><span class="status approved">Approved</span></td>
-                        </tr>
-                        <tr>
-                            <td>7</td>
-                            <td>28/03/2023</td>
-                            <td>Aadhar Update</td>
-                            <td>1 day</td>
-                            <td><span class="status approved">Pending</span></td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
-            
+
             <div class="sidebar">
                 <h2>Leave<br>Application</h2>
-                <div class="button-container">                
+                <div class="button-container">
                     <button class="new">New</button>
                     <button class="records">Records</button>
                 </div>
-
             </div>
-                 
-
         </main>
     </div>
 </body>

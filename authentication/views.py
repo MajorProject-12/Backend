@@ -1,4 +1,4 @@
-# authentication/models.py
+# authentication/views.py
 from django.contrib.auth import authenticate, login, logout
 import random
 import string
@@ -13,6 +13,12 @@ from django.shortcuts import get_object_or_404
 from remarks.models import CounselorRemark
 from authentication.models import Student, Counselor
 from attendance.models import Attendance
+from django.http import JsonResponse
+from django.utils import timezone
+from django.db.models import Q
+from datetime import datetime, timedelta
+from reports.models import StudentWork, CounselorWork
+from leave.models import StudentLeave, CounselorLeave  # Added import for leave models
 
 #############################################################
 #                   Student Views                           #
@@ -247,14 +253,78 @@ def student_remarks(request):
 
 @login_required
 def student_leave(request):
-    student = request.user.student
-    context = {'student': student}
+    """View for student leave application page"""
+    student = get_object_or_404(Student, user=request.user)
+
+    if request.method == 'POST':
+        date = request.POST.get('date')
+        reason = request.POST.get('reason')
+        no_of_days = request.POST.get('days')
+
+        # Create new leave application with Pending status
+        leave = StudentLeave.objects.create(
+            student=student,
+            date=date,
+            reason=reason,
+            no_of_days=no_of_days,
+            status='Pending'
+        )
+
+        return redirect('student_leave')
+
+    # Get all leave applications for this student
+    leave_records = StudentLeave.objects.filter(student=student).order_by('-date')
+
+    context = {
+        'student': student,
+        'leave_records': leave_records
+    }
+
     return render(request, 'student_leave.html', context)
 
 @login_required
 def student_weekly_report(request):
-    student = request.user.student
-    context = {'student': student}
+    """View for students to submit weekly reports and view their report history"""
+    try:
+        student = Student.objects.get(user=request.user)
+    except Student.DoesNotExist:
+        messages.error(request, "You don't have a student profile.")
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        date_str = request.POST.get('date')
+        work_done = request.POST.get('work_done')
+
+        if date_str and work_done:
+            try:
+                # Parse the date string into a date object
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+
+                # Create the StudentWork instance directly
+                work = StudentWork(
+                    student=student,
+                    date=date_obj,  # Set the date value
+                    work_done=work_done
+                )
+
+                work.save()
+                messages.success(request, "Weekly report submitted successfully.")
+                return redirect('student_weekly_reports')
+            except ValueError:
+                messages.error(request, "Invalid date format. Please use YYYY-MM-DD format.")
+            except Exception as e:
+                messages.error(request, f"Error saving report: {str(e)}")
+        else:
+            messages.error(request, "Please fill in all required fields.")
+
+    # Get student's reports history
+    student_reports = StudentWork.objects.filter(student=student).order_by('-date')
+
+    context = {
+        'student': student,
+        'student_reports': student_reports,
+    }
+
     return render(request, 'student_weekly_reports.html', context)
 
 #############################################################
@@ -285,10 +355,10 @@ def student_insights(request):
             try:
                 student = Student.objects.get(roll_number=student_roll)
 
-                # Debug information
-                print(f"Creating remark for {student_roll}: {remark_text}")
-                print(f"Student found: {student}")
-                print(f"Counselor: {counselor}")
+                # # Debug information
+                # print(f"Creating remark for {student_roll}: {remark_text}")
+                # print(f"Student found: {student}")
+                # print(f"Counselor: {counselor}")
 
                 # Verify this student is assigned to the current counselor
                 if student.counselor == counselor:
@@ -299,7 +369,7 @@ def student_insights(request):
                         percentage=student.attendance_percentage,
                         remarks=remark_text,
                     )
-                    print(f"Remark created: {new_remark}")
+                    # print(f"Remark created: {new_remark}")
                     messages.success(request, "Remark added successfully!")
                     return redirect("student_insights")
                 else:
@@ -320,7 +390,7 @@ def student_insights(request):
         # Format attendance percentage for display (round to 2 decimal places)
         student.latest_attendance = round(student.attendance_percentage, 2)
         # Debug student information
-        print(f"Student: {student.roll_number}, User: {student.user.first_name} {student.user.last_name}")
+        # print(f"Student: {student.roll_number}, User: {student.user.first_name} {student.user.last_name}")
 
     # Sort students: lower attendance come first
     students = sorted(students, key=lambda s: s.latest_attendance)
@@ -343,18 +413,253 @@ def student_insights(request):
     }
     return render(request, "counselor_insights.html", context)
 
+
 @login_required
 def counselor_leave(request):
-    counselor = request.user.counselor
+    """View for counselor leave application page"""
+    counselor = get_object_or_404(Counselor, user=request.user)
+
+    # Auto-move applications older than 24 hours to 'Records' section
+    one_day_ago = timezone.now() - timedelta(days=1)
+
+    # Get today's leave applications - most recent first
+    today = timezone.now().date()
+    today_leaves = StudentLeave.objects.filter(
+        student__in=Student.objects.filter(counselor=counselor),
+        date=today
+    ).order_by('-created_at')  # Most recent first
+
+    # Get all leave applications for records
+    all_leaves = StudentLeave.objects.filter(
+        student__in=Student.objects.filter(counselor=counselor)
+    ).order_by('-created_at')  # Most recent first
+
+    # Flag old pending applications
+    for leave in today_leaves:
+        if leave.created_at < one_day_ago:
+            leave.is_old = True
+        else:
+            leave.is_old = False
+
     context = {
         'counselor': counselor,
+        'today_leaves': today_leaves,
+        'all_leaves': all_leaves,
+        'one_day_ago': one_day_ago,
     }
+
     return render(request, 'counselor_leave.html', context)
 
 @login_required
+def update_leave_status(request):
+    """Handle leave status updates (approve/reject/reset)"""
+    if request.method == 'POST':
+        leave_id = request.POST.get('leave_id')
+        new_status = request.POST.get('status')
+
+        # Debug print
+        print(f"Updating leave {leave_id} to status {new_status}")
+
+        if not leave_id or leave_id == 'null':
+            return JsonResponse({'success': False, 'message': 'Invalid leave ID'}, status=400)
+
+        try:
+            leave = get_object_or_404(StudentLeave, id=leave_id)
+            counselor = get_object_or_404(Counselor, user=request.user)
+
+            if leave.student.counselor != counselor:
+                return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
+
+            # Check time restrictions - 24 hours for moving to Records
+            one_day_ago = timezone.now() - timedelta(days=1)
+            if leave.created_at < one_day_ago and new_status == 'Pending':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Cannot reset applications older than 24 hours'
+                }, status=400)
+
+            # Check if status is being changed from Approved/Rejected to Pending (a reset operation)
+            if leave.status != 'Pending' and new_status == 'Pending':
+                # Check if within 15 minute window
+                fifteen_min_ago = timezone.now() - timedelta(minutes=15)
+
+                # Find any existing CounselorLeave records
+                existing_records = CounselorLeave.objects.filter(
+                    counselor=counselor,
+                    student=leave.student
+                )
+
+                if existing_records.exists() and existing_records.first().updated_at < fifteen_min_ago:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Cannot reset status after 15 minutes'
+                    }, status=400)
+
+            # Update the StudentLeave record
+            leave.status = new_status
+            leave.save()
+
+            # Create or update CounselorLeave record - THIS IS THE KEY FIX
+            # First, delete any existing records for this student-counselor pair
+            CounselorLeave.objects.filter(
+                counselor=counselor,
+                student=leave.student
+            ).delete()
+
+            # Then create a new record
+            counselor_leave = CounselorLeave.objects.create(
+                counselor=counselor,
+                student=leave.student,
+                status=new_status,
+                updated_at=timezone.now()
+            )
+
+            print(f"Created CounselorLeave record: ID={counselor_leave.id}, Status={counselor_leave.status}")
+
+            return JsonResponse({'success': True})
+
+        except Exception as e:
+            print(f"Error updating leave status: {str(e)}")
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+
+@login_required
+def filter_leaves(request):
+    """Filter leave records by search term, month, or year"""
+    if request.method == 'GET':
+        search_term = request.GET.get('search', '')
+        month = request.GET.get('month', '')
+        year = request.GET.get('year', '')
+
+        counselor = get_object_or_404(Counselor, user=request.user)
+
+        # Start with all leaves for this counselor
+        leaves = StudentLeave.objects.filter(
+            student__in=Student.objects.filter(counselor=counselor)
+        )
+
+        # Apply filters
+        if search_term:
+            leaves = leaves.filter(
+                Q(student__user__username__icontains=search_term) |
+                Q(student__roll_number__icontains=search_term)
+            )
+
+        if month and month != 'Select':
+            leaves = leaves.filter(date__month=month)
+        if year and year != 'Select':
+            leaves = leaves.filter(date__year=year)
+
+        # Get today's leaves separately for the top section
+        today = timezone.now().date()
+        twelve_hours_ago = timezone.now() - timedelta(hours=12)
+
+        today_leaves = StudentLeave.objects.filter(
+            student__in=Student.objects.filter(counselor=counselor),
+            date=today
+        ).order_by('-created_at')  # Most recent first
+
+        # Flag old pending applications
+        for leave in today_leaves:
+            if leave.status == 'Pending' and leave.created_at < twelve_hours_ago:
+                leave.is_old = True
+            else:
+                leave.is_old = False
+
+        context = {
+            'counselor': counselor,
+            'today_leaves': today_leaves,
+            'all_leaves': leaves.order_by('-created_at'),  # Most recent first
+            'twelve_hours_ago': twelve_hours_ago,
+            'search_term': search_term,
+            'month': month,
+            'year': year
+        }
+
+        return render(request, 'counselor_leave.html', context)
+
+    return redirect('counselor_leave')
+
+@login_required
 def counselor_weekly_reports(request):
-    counselor = request.user.counselor
+    """View for counselors to view student reports"""
+    try:
+        counselor = Counselor.objects.get(user=request.user)
+    except Counselor.DoesNotExist:
+        messages.error(request, "You don't have a counselor profile.")
+        return redirect('dashboard')
+
+    # Get this week's reports (from last Monday to now)
+    today = timezone.now().date()
+    last_monday = today - timedelta(days=today.weekday())  # Get the most recent Monday
+
+    # Get students assigned to this counselor
+    students = Student.objects.filter(counselor=counselor)
+
+    # Get this week's reports for the counselor's students
+    this_week_reports = StudentWork.objects.filter(
+        student__in=students,
+        date__gte=last_monday
+    ).order_by('-date')
+
+    # Get all reports for archive
+    all_reports = StudentWork.objects.filter(
+        student__in=students
+    ).order_by('-date')
+
     context = {
         'counselor': counselor,
+        'this_week_reports': this_week_reports,
+        'all_reports': all_reports,
+        'searchApiUrl': '/counselor/search-reports/',  # Direct URL instead of using reverse()
     }
     return render(request, 'counselor_weekly_reports.html', context)
+
+# Add the search_reports view as well
+@login_required
+def search_reports(request):
+    """API view for searching student reports"""
+    try:
+        counselor = Counselor.objects.get(user=request.user)
+    except Counselor.DoesNotExist:
+        return JsonResponse({'error': 'Not authorized'}, status=403)
+
+    # Get search parameters
+    search_query = request.GET.get('query', '')
+    month = request.GET.get('month', '')
+    year = request.GET.get('year', '')
+
+    # Get students assigned to this counselor
+    students = Student.objects.filter(counselor=counselor)
+
+    # Start with all reports
+    reports = StudentWork.objects.filter(student__in=students)
+
+    # Apply search filters
+    if search_query:
+        reports = reports.filter(
+            Q(student__roll_number__icontains=search_query) |
+            Q(student__user__first_name__icontains=search_query) |
+            Q(student__user__last_name__icontains=search_query)
+        )
+
+    # Apply date filters
+    if month and month != 'Select':
+        reports = reports.filter(date__month=int(month))
+
+    if year and year != 'Select':
+        reports = reports.filter(date__year=int(year))
+
+    # Convert to list of dictionaries for JSON response
+    reports_data = []
+    for i, report in enumerate(reports.order_by('-date'), 1):
+        reports_data.append({
+            'sno': i,
+            'date': report.date.strftime('%d/%m/%Y'),
+            'roll_no': report.student.roll_number,
+            'student_name': f"{report.student.user.first_name} {report.student.user.last_name}",
+            'work_done': report.work_done,
+        })
+
+    return JsonResponse({'reports': reports_data})

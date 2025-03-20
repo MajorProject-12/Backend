@@ -1,237 +1,304 @@
-<!--counselor_leave.html-->
+<!--templates/leave/counselor_leave.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  {% load static %}
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leave Applications</title>
-  <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Note: Adjust font weight range if needed -->
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-  <link rel="stylesheet" href="{% static 'css/header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/counselor_leave.css' %}">
-  <script src="{% static 'js/header.js' %}"></script>
-  <script src="{% static 'js/counselor_leave.js' %}"></script>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Applications</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/counselor_leave.css' %}">
+    <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'js/counselor_leave.js' %}"></script>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
-  <header>
-    <div class="logo-container">
-      <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
-    </div>
-    <nav class="nav-content">
-      <div class="nav-links">
-        <a href="{% url 'counselor_dashboard' %}" class="nav-item" id="nav-item0">Dashboard</a>
-        <!-- <a href="#" class="nav-item" id="nav-item1">Manage Students</a> -->
-        <a href="{% url 'counselor_insights' %}" class="nav-item" id="nav-item1">Student Insights</a>
-        <a href="#" class="nav-item" id="nav-item2">Leave Applications</a>
-        <a href="{% url 'counselor_weekly_reports' %}" class="nav-item" id="nav-item3">Weekly Reports</a>
-      </div>
-    </nav>
-
-    <div class="right-container">
-      <div class="notifications" id="notifications">
-        <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
-      </div>
-      <div class="burger-menu" id="burger-menu">
-        <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
-      </div>
-    </div>
-
-    <div class="dropdown-menu" id="notification-dropdown-menu">
-      <h2>Notifications</h2>
-      <a class="menu-item" href="#">Notification 1</a>
-      <a class="menu-item" href="#">Notification 2</a>
-      <a class="menu-item" href="#">Notification 3</a>
-      <div class="footer">
-        <span>View All</span>
-      </div>
-    </div>
-
-    <div class="burger-dropdown" id="burger-dropdown">
-      <h2>Menu</h2>
-      <a class="menu-item" href="counselor_dashboard.html">Dashboard</a>
-      <!-- <a class="menu-item" href="#">Manage Students</a> -->
-      <a class="menu-item" href="counselor_insights.html">Student Insights</a>
-      <a class="menu-item" href="counselor_leave.html">Leave Applications</a>
-      <a class="menu-item" href="counselor_weekly_reports.html">Weekly Reports</a>
-      <hr>
-      <a class="menu-item" href="#">Profile</a>
-      <a class="menu-item" href="counselor_settings.html">Settings</a>
-      <div class="footer">
-        <a href="counselor_faqs.html" id="faqs"><span>FAQs</span></a>
-        <a href="#" id="sign_out">Sign out</a>
-      </div>
-    </div>
-
-    <div class="profile-container" id="profile-container">
-      <div class="profile" id="profile">
-        <img alt="User profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
-        <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
-      </div>
-      <div class="dropdown-menu" id="dropdown-menu">
-        <h2>Hello {{ counselor.user.username }}</h2>
-        <a class="menu-item" href="#">Profile</a>
-        <a class="menu-item" href="counselor_settings.html">Settings</a>
-        <div class="footer">
-          <a href="counselor_faqs.html" id="faqs"><span>FAQs</span></a>
-          <a href="#" id="sign_out">Sign out</a>
+    {% csrf_token %}
+    <header>
+        <div class="logo-container">
+            <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
         </div>
-      </div>
-    </div>
-  </header>
+        <nav class="nav-content">
+            <div class="nav-links">
+                <a href="{% url 'counselor_dashboard' %}" class="nav-item" id="nav-item0">Dashboard</a>
+                <a href="{% url 'counselor_insights' %}" class="nav-item" id="nav-item1">Student Insights</a>
+                <a href="#" class="nav-item" id="nav-item2">Leave Applications</a>
+                <a href="{% url 'counselor_weekly_reports' %}" class="nav-item" id="nav-item3">Weekly Reports</a>
+            </div>
+        </nav>
 
-  <div class="content">
-    <main class="content-wrapper">
-      <div class="sidebar">
-        <h2>Leave<br>Applications</h2>
-        <div class="button-container">
-          <button class="new">New</button>
-          <button class="records">Records</button>
+        <div class="right-container">
+            <div class="notifications" id="notifications">
+                <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
+            </div>
+            <div class="burger-menu" id="burger-menu">
+                <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
+            </div>
         </div>
-      </div>
 
-      <div class="top-controls">
-        <div class="search-container">
-          <input type="text" placeholder="search by name or roll no">
-          <i class="fas fa-search search-icon"></i>
+        <div class="dropdown-menu" id="notification-dropdown-menu">
+            <h2>Notifications</h2>
+            <a class="menu-item" href="#">Notification 1</a>
+            <a class="menu-item" href="#">Notification 2</a>
+            <a class="menu-item" href="#">Notification 3</a>
+            <div class="footer">
+                <span>View All</span>
+            </div>
         </div>
-        <div class="month-year-selector">
-          <div class="label">Month</div>
-          <div class="dropdown">
-            <select id="monthSelect">
-              <option value="Select">Select</option>
-              <option value="01">January</option>
-              <option value="02">February</option>
-              <option value="03">March</option>
-              <option value="04">April</option>
-              <option value="05">May</option>
-              <option value="06">June</option>
-              <option value="07">July</option>
-              <option value="08">August</option>
-              <option value="09">September</option>
-              <option value="10">October</option>
-              <option value="11">November</option>
-              <option value="12">December</option>
-            </select>
-            <i class="fas fa-caret-down"></i>
-          </div>
-          <div class="label">Year</div>
-          <div class="dropdown">
-            <select id="yearSelect">
-              <option>Select</option>
-              <!-- Years will be populated by JavaScript -->
-            </select>
-            <i class="fas fa-caret-down"></i>
-          </div>
-        </div>
-      </div>
 
-      <div class="container-1">
-        <div class="info">
-          <h1>Today's Leave Applications</h1>
-          <div class="tooltip">
-            <!-- Info icon loaded directly from HTML -->
-            <img src="{% static 'images/icons/info.svg' %}" alt="info" height="20px">
-            <span class="tooltiptext">Data modifications are allowed only within 15 minutes from the initial change.</span>
-          </div>
+        <div class="burger-dropdown" id="burger-dropdown">
+            <h2>Menu</h2>
+            <a class="menu-item" href="{% url 'counselor_dashboard' %}">Dashboard</a>
+            <a class="menu-item" href="{% url 'counselor_insights' %}">Student Insights</a>
+            <a class="menu-item" href="{% url 'counselor_leave' %}">Leave Applications</a>
+            <a class="menu-item" href="{% url 'counselor_weekly_reports' %}">Weekly Reports</a>
+            <hr>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <a href="#" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+            </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Date</th>
-              <th>Roll No</th>
-              <th>Student Name</th>
-              <th>Absence reason</th>
-              <th>Number of Days</th>
-              <th>Status</th>
-              <th>Operations</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>12/03/2023</td>
-              <td>21bq1a4201</td>
-              <td>Rohit</td>
-              <td>Sick</td>
-              <td>1 day</td>
-              <td><span class="status pending">Pending</span></td>
-              <!-- Pre-populated operations cell with images loaded from HTML -->
-              <td class="operations">
-                <div class="operations-1">
-                  <button class="approve" title="Approve">
-                    <img src="{% static 'images/icons/Approve.svg' %}" alt="Approve">
-                  </button>
-                  <button class="reject" title="Reject">
-                    <img src="{% static 'images/icons/Reject.svg' %}" alt="Reject">
-                  </button>
+
+        <div class="profile-container" id="profile-container">
+            <div class="profile" id="profile">
+                <img alt="User profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+                <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu">
+                <h2>Hello {{ counselor.user.username }}</h2>
+                <a class="menu-item" href="#">Profile</a>
+                <a class="menu-item" href="#">Settings</a>
+                <div class="footer">
+                    <a href="#" id="faqs"><span>FAQs</span></a>
+                    <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
                 </div>
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>15/03/2023</td>
-              <td>21bq1a4227</td>
-              <td>Naveen</td>
-              <td>Transport issue</td>
-              <td>1 day</td>
-              <td><span class="status approved">Approved</span></td>
-              <!-- Operations cell (can be empty if status is approved) -->
-              <td class="operations">
-                <div class="operations-2">
-                  <button class="reset" title="Reset">
-                    <img src="{% static 'images/icons/Reset-status.svg' %}" alt="Reset">
-                  </button>
-                  Reset
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+            </div>
+        </div>
+    </header>
 
-      <div class="container-2">
-        <h1>Absence records</h1>
-        <table>
-          <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Date</th>
-              <th>Roll No</th>
-              <th>Student Name</th>
-              <th>Absence reason</th>
-              <th>Number of Days</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>12/03/2023</td>
-              <td>21bq1a4208</td>
-              <td>Rohan</td>
-              <td>Sick</td>
-              <td>1 day</td>
-              <td><span class="status pending">Approved</span></td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>15/03/2023</td>
-              <td>21bq1a4223</td>
-              <td>Akash</td>
-              <td>Transport issue</td>
-              <td>1 day</td>
-              <td><span class="status approved">Approved</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
+    <div class="content">
+        <main class="content-wrapper">
+            <div class="sidebar">
+                <h2>Leave<br>Applications</h2>
+                <div class="button-container">
+                    <button class="new">New</button>
+                    <button class="records">Records</button>
+                </div>
+            </div>
+
+            <div class="top-controls">
+                <form method="GET" action="{% url 'filter_leaves' %}" id="searchForm">
+                    <div class="search-container">
+                        <input type="text" name="search" placeholder="search by name or roll no">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    <div class="month-year-selector">
+                        <div class="label">Month</div>
+                        <div class="dropdown">
+                            <select id="monthSelect" name="month">
+                                <option value="Select">Select</option>
+                                <option value="01">January</option>
+                                <option value="02">February</option>
+                                <option value="03">March</option>
+                                <option value="04">April</option>
+                                <option value="05">May</option>
+                                <option value="06">June</option>
+                                <option value="07">July</option>
+                                <option value="08">August</option>
+                                <option value="09">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <i class="fas fa-caret-down"></i>
+                        </div>
+                        <div class="label">Year</div>
+                        <div class="dropdown">
+                            <select id="yearSelect" name="year">
+                                <option value="Select">Select</option>
+                                <!-- Years will be populated by JavaScript -->
+                            </select>
+                            <i class="fas fa-caret-down"></i>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="container-1">
+                <div class="info">
+                    <h1>Today's Leave Applications</h1>
+                    <div class="tooltip">
+                        <img src="{% static 'images/icons/info.svg' %}" alt="info" height="20px">
+                        <span class="tooltiptext">Data modifications are allowed only within 15 minutes from the initial change. Applications older than 24 hours are automatically moved to Records section.</span>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Date</th>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Absence reason</th>
+                            <th>Number of Days</th>
+                            <th>Status</th>
+                            <th>Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in today_leaves %}
+                        {% if not leave.is_old %}
+                        <tr data-leave-id="{{ leave.id }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ leave.date|date:"d/m/Y" }}</td>
+                            <td>{{ leave.student.roll_number }}</td>
+                            <td>{{ leave.student.user.username }}</td>
+                            <td>{{ leave.reason }}</td>
+                            <td>{{ leave.no_of_days }} day{% if leave.no_of_days > 1 %}s{% endif %}</td>
+                            <td><span class="status {{ leave.status|lower }}">{{ leave.status }}</span></td>
+                            <td class="operations">
+                                {% if leave.status == 'Pending' %}
+                                <div class="operations-1">
+                                    <button class="approve" title="Approve" data-leave-id="{{ leave.id }}">
+                                        <img src="{% static 'images/icons/Approve.svg' %}" alt="Approve">
+                                    </button>
+                                    <button class="reject" title="Reject" data-leave-id="{{ leave.id }}">
+                                        <img src="{% static 'images/icons/Reject.svg' %}" alt="Reject">
+                                    </button>
+                                </div>
+                                {% else %}
+                                <div class="operations-2">
+                                    <button class="reset" title="Reset" data-leave-id="{{ leave.id }}">
+                                        <img src="{% static 'images/icons/Reset-status.svg' %}" alt="Reset">
+                                    </button>
+                                    Reset
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No leave applications for today.</td>
+                        </tr>
+                        {% endfor %}
+                        {% if today_leaves %}
+                        {% with has_new_leaves=False %}
+                        {% for leave in today_leaves %}
+                        {% if not leave.is_old %}
+                        {% with has_new_leaves=True %}{% endwith %}
+                        {% endif %}
+                        {% endfor %}
+                        {% if not has_new_leaves %}
+                        <tr>
+                            <td colspan="8" class="text-center">No recent leave applications. Check Records for older applications.</td>
+                        </tr>
+                        {% endif %}
+                        {% endwith %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="container-2">
+                <h1>Absence records</h1>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Date</th>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Absence reason</th>
+                            <th>Number of Days</th>
+                            <th>Status</th>
+                            <th>Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Show old pending applications first -->
+                        {% for leave in today_leaves %}
+                        {% if leave.is_old %}
+                        <tr data-leave-id="{{ leave.id }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ leave.date|date:"d/m/Y" }}</td>
+                            <td>{{ leave.student.roll_number }}</td>
+                            <td>{{ leave.student.user.username }}</td>
+                            <td>{{ leave.reason }}</td>
+                            <td>{{ leave.no_of_days }} day{% if leave.no_of_days > 1 %}s{% endif %}</td>
+                            <td><span class="status {{ leave.status|lower }}">{{ leave.status }}</span></td>
+                            <td class="operations">
+                                {% if leave.status == 'Pending' %}
+                                <div class="operations-1">
+                                    <button class="approve" title="Approve" data-leave-id="{{ leave.id }}">
+                                        <img src="{% static 'images/icons/Approve.svg' %}" alt="Approve">
+                                    </button>
+                                    <button class="reject" title="Reject" data-leave-id="{{ leave.id }}">
+                                        <img src="{% static 'images/icons/Reject.svg' %}" alt="Reject">
+                                    </button>
+                                </div>
+                                {% else %}
+                                <div class="operations-2">
+                                    <button class="reset" title="Reset" data-leave-id="{{ leave.id }}">
+                                        <img src="{% static 'images/icons/Reset-status.svg' %}" alt="Reset">
+                                    </button>
+                                    Reset
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+
+                        <!-- Then show all other records -->
+                        {% for leave in all_leaves %}
+                        {% if leave.date != today or not leave.is_old %}
+                        <tr data-leave-id="{{ leave.id }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ leave.date|date:"d/m/Y" }}</td>
+                            <td>{{ leave.student.roll_number }}</td>
+                            <td>{{ leave.student.user.username }}</td>
+                            <td>{{ leave.reason }}</td>
+                            <td>{{ leave.no_of_days }} day{% if leave.no_of_days > 1 %}s{% endif %}</td>
+                            <td><span class="status {{ leave.status|lower }}">{{ leave.status }}</span></td>
+                            <td class="operations">
+                                {% if leave.status == 'Pending' %}
+                                <div class="operations-1">
+                                    <button class="approve" title="Approve" data-leave-id="{{ leave.id }}">
+                                        <img src="{% static 'images/icons/Approve.svg' %}" alt="Approve">
+                                    </button>
+                                    <button class="reject" title="Reject" data-leave-id="{{ leave.id }}">
+                                        <img src="{% static 'images/icons/Reject.svg' %}" alt="Reject">
+                                    </button>
+                                </div>
+                                {% else %}
+                                <div class="operations-2">
+                                    <button class="reset" title="Reset" data-leave-id="{{ leave.id }}">
+                                        <img src="{% static 'images/icons/Reset-status.svg' %}" alt="Reset">
+                                    </button>
+                                    Reset
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if not all_leaves and not today_leaves %}
+                        <tr>
+                            <td colspan="8" class="text-center">No leave records found.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
 </body>
 </html>

@@ -1,80 +1,104 @@
 // Wait for the DOM to load
 document.addEventListener("DOMContentLoaded", function () {
-// Get references to the buttons and containers
-const newButton = document.querySelector(".new");
-const recordsButton = document.querySelector(".records");
-const container1 = document.querySelector(".container-1");
-const container2 = document.querySelector(".container-2");
+    // Get references to the buttons and containers
+    const newButton = document.querySelector(".new");
+    const recordsButton = document.querySelector(".records");
+    const container1 = document.querySelector(".container-1");
+    const container2 = document.querySelector(".container-2");
 
-// Set the "New" button to the active state by default
-newButton.classList.add("active");
+    // Set the "New" button to the active state by default
+    newButton.classList.add("active");
 
-// Add event listeners to the buttons
-newButton.addEventListener("click", function () {
-// Only proceed if container-1 is not already displayed
-if (container1.style.display !== "block") {
-    // Fade in container-1 and hide container-2
+    // Show container-1 (New Report Form) by default
     container1.style.display = "block";
-    container1.style.opacity = 0;
-    fadeIn(container1);
-
     container2.style.display = "none";
 
-    // Add active class to new button
-    newButton.classList.add("active");
-    recordsButton.classList.remove("active");
-}
-});
+    // Add event listeners to the buttons
+    newButton.addEventListener("click", function () {
+        // Only proceed if container-1 is not already displayed
+        if (container1.style.display !== "block") {
+            // Fade in container-1 and hide container-2
+            container1.style.display = "block";
+            container1.style.opacity = 0;
+            fadeIn(container1);
 
-recordsButton.addEventListener("click", function () {
-// Only proceed if container-2 is not already displayed
-if (container2.style.display !== "block") {
-    // Fade in container-2 and hide container-1
-    container2.style.display = "block";
-    container2.style.opacity = 0;
-    fadeIn(container2);
+            container2.style.display = "none";
 
-    container1.style.display = "none";
+            // Add active class to new button
+            newButton.classList.add("active");
+            recordsButton.classList.remove("active");
+        }
+    });
 
-    // Add active class to records button
-    recordsButton.classList.add("active");
-    newButton.classList.remove("active");
-}
-});
+    recordsButton.addEventListener("click", function () {
+        // Only proceed if container-2 is not already displayed
+        if (container2.style.display !== "block") {
+            // Fade in container-2 and hide container-1
+            container2.style.display = "block";
+            container2.style.opacity = 0;
+            fadeIn(container2);
 
-// Function to fade in an element
-function fadeIn(element) {
-let opacity = 0;
-const interval = setInterval(function () {
-    if (opacity < 1) {
-        opacity += 0.2;
-        element.style.opacity = opacity;
-    } else {
-        clearInterval(interval);
-    }
-}, 50);
-}
+            container1.style.display = "none";
 
-// Get all "Work Done" table cells
-const workDoneCells = document.querySelectorAll("td:nth-child(3)");
+            // Add active class to records button
+            recordsButton.classList.add("active");
+            newButton.classList.remove("active");
+        }
+    });
 
-workDoneCells.forEach(cell => {
-    // Get the text content of the cell
-    const text = cell.textContent;
-
-    // Split the text by numbers (e.g., "1.", "2.", etc.)
-    const points = text.split(/(\d+\.)/g).filter(Boolean);
-
-    // Create a new HTML structure for the points
-    let formattedText = "";
-    for (let i = 0; i < points.length; i += 2) {
-        const pointNumber = points[i]; // e.g., "1."
-        const pointText = points[i + 1].trim(); // e.g., "Completed course on Java"
-        formattedText += `<div>${pointNumber} ${pointText}</div>`;
+    // Function to fade in an element
+    function fadeIn(element) {
+        let opacity = 0;
+        const interval = setInterval(function () {
+            if (opacity < 1) {
+                opacity += 0.2;
+                element.style.opacity = opacity;
+            } else {
+                clearInterval(interval);
+            }
+        }, 50);
     }
 
-    // Update the cell's inner HTML with the formatted text
-    cell.innerHTML = formattedText;
-});
+    // Get all "Work Done" table cells
+    const workDoneCells = document.querySelectorAll("td:nth-child(3)");
 
-});      
+    workDoneCells.forEach(cell => {
+        // Get the text content of the cell
+        const text = cell.textContent;
+
+        // Split the text by numbers (e.g., "1.", "2.", etc.)
+        const points = text.split(/(\d+\.)/g).filter(Boolean);
+
+        // Create a new HTML structure for the points
+        let formattedText = "";
+        for (let i = 0; i < points.length; i += 2) {
+            if (i + 1 < points.length) {
+                const pointNumber = points[i]; // e.g., "1."
+                const pointText = points[i + 1].trim(); // e.g., "Completed course on Java"
+                formattedText += `<div>${pointNumber} ${pointText}</div>`;
+            } else {
+                // Handle odd number of elements
+                formattedText += `<div>${points[i]}</div>`;
+            }
+        }
+
+        // If no points were found, just use the original text
+        if (formattedText === "") {
+            formattedText = text;
+        }
+
+        // Update the cell's inner HTML with the formatted text
+        cell.innerHTML = formattedText;
+    });
+
+    // Make sure today's date is set as default for the date input
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        dateInput.value = formattedDate;
+    }
+});

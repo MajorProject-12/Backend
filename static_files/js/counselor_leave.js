@@ -8,6 +8,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const monthYearSelector = document.querySelector(".month-year-selector");
   const searchInput = document.querySelector('.search-container input');
   const searchIcon = document.querySelector('.search-container .search-icon');
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+
+  // Get search parameters from URL
+  const urlParams = new URLSearchParams(window.location.search);
 
   // Set the "New" button to the active state by default
   newButton.classList.add("active");
@@ -178,6 +182,80 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Function to send status update to the server via AJAX
+  function updateLeaveStatus(leaveId, status) {
+    // Validate leave ID to avoid the 'null' error
+    if (!leaveId || leaveId === 'null') {
+      console.error("Invalid leave ID:", leaveId);
+      alert("Error: Cannot identify the leave application");
+      return false;
+    }
+
+    console.log("Updating leave ID:", leaveId, "to status:", status);
+
+    // Disable all operation buttons to prevent multiple clicks
+    const buttons = document.querySelectorAll('.approve, .reject, .reset');
+    buttons.forEach(button => {
+      button.disabled = true;
+      if (button.classList.contains('approve') || button.classList.contains('reject') || button.classList.contains('reset')) {
+        button.style.opacity = 0.5;
+      }
+    });
+
+    // Create form data for the AJAX request
+    const formData = new FormData();
+    formData.append('leave_id', leaveId);
+    formData.append('status', status);
+    formData.append('csrfmiddlewaretoken', csrfToken);
+
+    // Send AJAX request
+    fetch('/counselor/leave/update/', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(errorData => {
+          throw new Error(errorData.message || `HTTP error ${response.status}`);
+        }).catch(() => {
+          // If JSON parsing fails, create a generic error
+          throw new Error(`HTTP error ${response.status}`);
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        // Show success message
+        console.log('Status updated successfully');
+
+        // Reload the page to show updated status
+        location.reload();
+      } else {
+        // Re-enable buttons on error
+        buttons.forEach(button => {
+          button.disabled = false;
+          button.style.opacity = 1;
+        });
+
+        alert(data.message || 'Error updating status');
+      }
+    })
+    .catch(error => {
+      // Re-enable buttons on error
+      buttons.forEach(button => {
+        button.disabled = false;
+        button.style.opacity = 1;
+      });
+
+      console.error('Error:', error);
+      alert('Error: ' + (error.message || 'An error occurred while updating the status'));
+    });
+  }
+
   // Attach event listeners to operation buttons
   function setOperations() {
     const tableRows = document.querySelectorAll('table tbody tr');
@@ -185,6 +263,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const cells = row.querySelectorAll('td');
       // Skip if this row doesn't have an operations column (i.e. fewer than 8 cells)
       if (cells.length < 8) return;
+
+      // Get the leave ID from a data attribute on the row
+      const leaveId = row.getAttribute('data-leave-id');
+
       const statusCell = cells[6]; // 7th cell (0-indexed)
       const operationsCell = cells[7]; // 8th cell
 
@@ -193,12 +275,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const initialStatus = statusElement ? statusElement.textContent.trim() : '';
 
       // Configure operations cell based on current status
-      updateOperationsCell(operationsCell, statusCell, initialStatus);
+      updateOperationsCell(operationsCell, statusCell, initialStatus, leaveId);
     });
   }
 
   // Function to update operations cell based on status
-  function updateOperationsCell(operationsCell, statusCell, status) {
+  function updateOperationsCell(operationsCell, statusCell, status, leaveId) {
     // Clear existing content
     operationsCell.innerHTML = '';
 
@@ -206,10 +288,10 @@ document.addEventListener("DOMContentLoaded", function () {
       // For pending status, show approve/reject buttons
       operationsCell.innerHTML = `
         <div class="operations-1">
-          <button class="approve" title="Approve">
+          <button class="approve" title="Approve" data-leave-id="${leaveId}">
             <img src="/static/images/icons/Approve.svg" alt="Approve">
           </button>
-          <button class="reject" title="Reject">
+          <button class="reject" title="Reject" data-leave-id="${leaveId}">
             <img src="/static/images/icons/Reject.svg" alt="Reject">
           </button>
         </div>
@@ -219,22 +301,26 @@ document.addEventListener("DOMContentLoaded", function () {
       const approveButton = operationsCell.querySelector('.approve');
       const rejectButton = operationsCell.querySelector('.reject');
 
-      approveButton.addEventListener('click', function() {
-        statusCell.innerHTML = '<span class="status approved">Approved</span>';
-        updateStatusColors();
-        updateOperationsCell(operationsCell, statusCell, 'Approved');
+      approveButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Get the leave ID from the button's data attribute
+        const id = this.getAttribute('data-leave-id');
+        updateLeaveStatus(id, 'Approved');
       });
 
-      rejectButton.addEventListener('click', function() {
-        statusCell.innerHTML = '<span class="status rejected">Rejected</span>';
-        updateStatusColors();
-        updateOperationsCell(operationsCell, statusCell, 'Rejected');
+      rejectButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Get the leave ID from the button's data attribute
+        const id = this.getAttribute('data-leave-id');
+        updateLeaveStatus(id, 'Rejected');
       });
     } else if (status === 'Approved' || status === 'Rejected') {
       // For approved/rejected status, show reset button
       operationsCell.innerHTML = `
         <div class="operations-2">
-          <button class="reset" title="Reset">
+          <button class="reset" title="Reset" data-leave-id="${leaveId}">
             <img src="/static/images/icons/Reset-status.svg" alt="Reset">
           </button>
           Reset
@@ -243,14 +329,92 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Add event listener to reset button
       const resetButton = operationsCell.querySelector('.reset');
-      resetButton.addEventListener('click', function() {
-        statusCell.innerHTML = '<span class="status pending">Pending</span>';
-        updateStatusColors();
-        updateOperationsCell(operationsCell, statusCell, 'Pending');
+      resetButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Get the leave ID from the button's data attribute
+        const id = this.getAttribute('data-leave-id');
+        updateLeaveStatus(id, 'Pending');
       });
     }
   }
 
-  // Initialize operations
+  // Also attach event listeners to any pre-existing buttons (from Django templates)
+  function attachEventListenersToExistingButtons() {
+    // Approve buttons
+    document.querySelectorAll('.approve').forEach(button => {
+      if (!button.hasAttribute('listener')) {
+        button.setAttribute('listener', 'true');
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = this.getAttribute('data-leave-id');
+          if (id && id !== 'null') {
+            updateLeaveStatus(id, 'Approved');
+          } else {
+            alert('Error: Cannot identify leave application');
+          }
+        });
+      }
+    });
+
+    // Reject buttons
+    document.querySelectorAll('.reject').forEach(button => {
+      if (!button.hasAttribute('listener')) {
+        button.setAttribute('listener', 'true');
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = this.getAttribute('data-leave-id');
+          if (id && id !== 'null') {
+            updateLeaveStatus(id, 'Rejected');
+          } else {
+            alert('Error: Cannot identify leave application');
+          }
+        });
+      }
+    });
+
+    // Reset buttons
+    document.querySelectorAll('.reset').forEach(button => {
+      if (!button.hasAttribute('listener')) {
+        button.setAttribute('listener', 'true');
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = this.getAttribute('data-leave-id');
+          if (id && id !== 'null') {
+            updateLeaveStatus(id, 'Pending');
+          } else {
+            alert('Error: Cannot identify leave application');
+          }
+        });
+      }
+    });
+  }
+
+  // Initialize operations and attach event listeners
   setOperations();
+  attachEventListenersToExistingButtons();
+
+  // Make sure the dropdown selects take the proper values (useful when filtering)
+  if (urlParams.has('month')) {
+    const monthValue = urlParams.get('month');
+    const monthSelect = document.getElementById('monthSelect');
+    if (monthSelect) {
+      monthSelect.value = monthValue;
+    }
+  }
+  if (urlParams.has('year')) {
+    const yearValue = urlParams.get('year');
+    const yearSelect = document.getElementById('yearSelect');
+    if (yearSelect) {
+      yearSelect.value = yearValue;
+    }
+  }
+
+  // Add any missing CSRF token on page
+  if (!csrfToken) {
+    console.warn('CSRF token not found in the page. This may cause issues with form submissions.');
+  }
 });

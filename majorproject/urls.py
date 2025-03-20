@@ -23,5 +23,6 @@ urlpatterns = [
     path('', include('authentication.urls')),
     path('', include('attendance.urls')),
     path('', include('remarks.urls')),
+    path('', include('leave.urls'))
 ]
 

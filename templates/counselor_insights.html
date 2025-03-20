@@ -68,7 +68,7 @@
                 <div class="search-container">
                     <form method="get" action="{% url 'counselor_insights' %}">
                         <input type="text" name="search" placeholder="search by name or roll no" value="{{ search_query }}">
-                        <button type="submit"><i class="fas fa-search search-icon"></i></button>
+<!--                        <button type="submit"><i class="fas fa-search search-icon"></i></button>-->
                     </form>
                 </div>
             </div>
@@ -97,8 +97,15 @@
                             <td>{{ student.user.username }}</td>
                             <td>{{ student.latest_attendance }}</td>
                             <td>
-                                <!-- Clicking the button will display the inline remark form -->
-                                <span class="btn-add-remark" data-roll="{{ student.roll_number }}" data-name="{{ student.user.first_name }} {{ student.user.last_name }}" data-attendance="{{ student.latest_attendance }}">Add Remark</span>
+                                <button class="btn-add-remark
+                                    {% if student.latest_attendance < 75 %}low-attendance
+                                    {% elif student.latest_attendance > 75 %}good-attendance
+                                    {% else %}warning-attendance{% endif %}"
+                                    data-roll="{{ student.roll_number }}"
+                                    data-name="{{ student.user.username }}"
+                                    data-attendance="{{ student.latest_attendance }}">
+                                    Add Remark
+                                </button>
                             </td>
                         </tr>
                         {% empty %}

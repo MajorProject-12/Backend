@@ -6,11 +6,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const container1 = document.querySelector(".container-1");
     const container2 = document.querySelector(".container-2");
     const monthYearSelector = document.querySelector(".month-year-selector");
-    const searchInput = document.querySelector('.search-container input');
+    const searchInput = document.querySelector('#searchInput');
     const searchIcon = document.querySelector('.search-container .search-icon');
+    const searchApiUrl = document.querySelector('#searchApiUrl').value;
 
     // Set the "New" button to the active state by default
     newButton.classList.add("active");
+
+    // Show container-1 (This Week) by default
+    container1.style.display = "block";
+    container2.style.display = "none";
+    monthYearSelector.style.display = "none";
 
     // Add event listeners to the buttons
     newButton.addEventListener("click", function () {
@@ -58,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Add event listeners to the search input and search icon
     searchInput.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
-            searchTable();
+            searchReports();
         }
     });
 
@@ -66,12 +72,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (searchInput.value.trim() === "") {
             resetSearch();
         } else {
-            searchTable();
+            searchReports();
         }
     });
 
     searchIcon.addEventListener('click', function() {
-        searchTable();
+        searchReports();
     });
 
     // Function to fade in an element
@@ -87,75 +93,132 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 50);
     }
 
-    // Function to search the table
-    function searchTable() {
-        // Get the search keyword
-        const keyword = searchInput.value.trim().toLowerCase();
+    // Function to search reports using the API
+    function searchReports() {
+        const keyword = searchInput.value.trim();
+        const month = document.getElementById('monthSelect').value;
+        const year = document.getElementById('yearSelect').value;
 
-        // Get all table rows
-        const tableRows = document.querySelectorAll('table tbody tr');
+        // Construct the API URL with query parameters
+        let url = searchApiUrl + '?query=' + encodeURIComponent(keyword);
 
-        // Loop through each table row
-        tableRows.forEach(function(row) {
-            // Get all table cells in the row
-            const tableCells = row.querySelectorAll('td');
+        if (month && month !== 'Select') {
+            url += '&month=' + encodeURIComponent(month);
+        }
 
-            // Initialize a flag to indicate if the row should be displayed
-            let displayRow = false;
+        if (year && year !== 'Select') {
+            url += '&year=' + encodeURIComponent(year);
+        }
 
-            // Loop through each table cell
-            tableCells.forEach(function(cell) {
-                // Get the text content of the cell
-                const text = cell.textContent.trim().toLowerCase();
+        // Make AJAX request to the API
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                // Get the appropriate table (this week or archive)
+                const table = container1.style.display === 'block' ?
+                    document.getElementById('this-week-table').querySelector('tbody') :
+                    document.getElementById('archive-table').querySelector('tbody');
 
-                // Check if the keyword is found in the cell text
-                if (text.includes(keyword)) {
-                    displayRow = true;
+                // Clear the current table
+                table.innerHTML = '';
+
+                // If no reports found
+                if (data.reports.length === 0) {
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.setAttribute('colspan', '5');
+                    cell.classList.add('text-center');
+                    cell.textContent = 'No reports found matching your criteria.';
+                    row.appendChild(cell);
+                    table.appendChild(row);
+                    return;
                 }
-            });
 
-            // Display or hide the row based on the flag
-            if (displayRow) {
-                row.style.display = 'table-row';
-            } else {
-                row.style.display = 'none';
-            }
-        });
+                // Populate the table with the returned data
+                data.reports.forEach(report => {
+                    const row = document.createElement('tr');
+
+                    // Create S.No cell
+                    const snoCell = document.createElement('td');
+                    snoCell.textContent = report.sno;
+                    row.appendChild(snoCell);
+
+                    // Create Date cell
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = report.date;
+                    row.appendChild(dateCell);
+
+                    // Create Roll No cell
+                    const rollNoCell = document.createElement('td');
+                    rollNoCell.textContent = report.roll_no;
+                    row.appendChild(rollNoCell);
+
+                    // Create Student Name cell
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = report.student_name;
+                    row.appendChild(nameCell);
+
+                    // Create Work Done cell
+                    const workDoneCell = document.createElement('td');
+                    formatWorkDone(workDoneCell, report.work_done);
+                    row.appendChild(workDoneCell);
+
+                    // Add the row to the table
+                    table.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error searching reports:', error);
+            });
     }
 
-    // Function to reset the search
+    // Function to reset the search (display all rows)
     function resetSearch() {
-        // Get all table rows
-        const tableRows = document.querySelectorAll('table tbody tr');
+        // Reset search is now handled by the searchReports function with empty parameters
+        if (container2.style.display === 'block') {
+            // Only refresh search if in archive view
+            const month = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearSelect').value;
 
-        // Loop through each table row
-        tableRows.forEach(function(row) {
-            // Display the row
-            row.style.display = 'table-row';
-        });
+            if (month !== 'Select' || year !== 'Select') {
+                searchReports();
+            }
+        }
     }
 
     // Get all "Work Done" table cells
     const workDoneCells = document.querySelectorAll("td:nth-child(5)");
 
     workDoneCells.forEach(cell => {
-        // Get the text content of the cell
-        const text = cell.textContent;
+        formatWorkDone(cell, cell.textContent);
+    });
 
+    // Function to format work done text with numbered points
+    function formatWorkDone(cell, text) {
         // Split the text by numbers (e.g., "1.", "2.", etc.)
         const points = text.split(/(\d+\.)/g).filter(Boolean);
 
         // Create a new HTML structure for the points
         let formattedText = "";
         for (let i = 0; i < points.length; i += 2) {
-            const pointNumber = points[i]; // e.g., "1."
-            const pointText = points[i + 1].trim(); // e.g., "Completed course on Java"
-            formattedText += `<div>${pointNumber} ${pointText}</div>`;
+            if (i + 1 < points.length) {
+                const pointNumber = points[i]; // e.g., "1."
+                const pointText = points[i + 1].trim(); // e.g., "Completed course on Java"
+                formattedText += `<div>${pointNumber} ${pointText}</div>`;
+            } else {
+                // Handle odd number of elements
+                formattedText += `<div>${points[i]}</div>`;
+            }
+        }
+
+        // If no points were found, just use the original text
+        if (formattedText === "") {
+            formattedText = text;
         }
 
         // Update the cell's inner HTML with the formatted text
         cell.innerHTML = formattedText;
-    });
+    }
 
     // Populate the year dropdown with a range of years
     const yearSelect = document.getElementById('yearSelect');
@@ -174,55 +237,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Add event listeners to the month and year dropdowns
     monthSelect.addEventListener('change', function() {
-        filterTable();
+        searchReports();
     });
 
     yearSelect.addEventListener('change', function() {
-        filterTable();
+        searchReports();
     });
-
-    // Function to filter the table data
-    function filterTable() {
-        // Get the selected month and year
-        const selectedMonth = monthSelect.value;
-        const selectedYear = yearSelect.value;
-
-        // Get all table rows
-        const tableRows = document.querySelectorAll('table tbody tr');
-
-        // Loop through each table row
-        tableRows.forEach(function(row) {
-            // Get the date cell in the row
-            const dateCell = row.querySelector('td:nth-child(2)');
-
-            // Get the date text from the date cell
-            const dateText = dateCell.textContent;
-
-            // Split the date text into day, month and year
-            const dateParts = dateText.split('/');
-            const day = dateParts[0];
-            const month = dateParts[1];
-            const year = dateParts[2];
-
-            // Initialize a flag to indicate if the row should be displayed
-            let displayRow = true;
-
-            // Check if the selected month is not "Select" and the month does not match
-            if (selectedMonth !== "Select" && month !== selectedMonth) {
-                displayRow = false;
-            }
-
-            // Check if the selected year is not "Select" and the year does not match
-            if (selectedYear !== "Select" && year !== selectedYear) {
-                displayRow = false;
-            }
-
-            // Display or hide the row based on the flag
-            if (displayRow) {
-                row.style.display = 'table-row';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
 });
