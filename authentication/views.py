@@ -18,7 +18,7 @@ from django.utils import timezone
 from django.db.models import Q
 from datetime import datetime, timedelta
 from reports.models import StudentWork, CounselorWork
-from leave.models import StudentLeave, CounselorLeave  # Added import for leave models
+from leave.models import StudentLeave
 
 #############################################################
 #                   Student Views                           #
@@ -270,10 +270,21 @@ def student_leave(request):
             status='Pending'
         )
 
+        messages.success(request, "Leave application submitted successfully!")
         return redirect('student_leave')
 
-    # Get all leave applications for this student
+    # Get all leave applications for this student - force database refresh
+    from django.db import connection
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1")  # Force connection refresh
+
+    # Query again with fresh connection
     leave_records = StudentLeave.objects.filter(student=student).order_by('-date')
+
+    # Add debug output
+    print(f"Retrieved {leave_records.count()} leave records for student {student.roll_number}")
+    for record in leave_records:
+        print(f"Leave record - ID: {record.id}, Date: {record.date}, Status: {record.status}")
 
     context = {
         'student': student,
@@ -371,7 +382,7 @@ def student_insights(request):
                     )
                     # print(f"Remark created: {new_remark}")
                     messages.success(request, "Remark added successfully!")
-                    return redirect("student_insights")
+                    return redirect("counselor_insights")
                 else:
                     # Handle case where student doesn't belong to this counselor
                     messages.error(request, "You can only add remarks for your assigned students.")
@@ -416,113 +427,122 @@ def student_insights(request):
 
 @login_required
 def counselor_leave(request):
-    """View for counselor leave application page"""
+    """View for counselor leave application page - improved to show pending requests in 'New' tab"""
     counselor = get_object_or_404(Counselor, user=request.user)
 
-    # Auto-move applications older than 24 hours to 'Records' section
-    one_day_ago = timezone.now() - timedelta(days=1)
+    # Get all students assigned to this counselor
+    students = Student.objects.filter(counselor=counselor)
 
-    # Get today's leave applications - most recent first
-    today = timezone.now().date()
-    today_leaves = StudentLeave.objects.filter(
-        student__in=Student.objects.filter(counselor=counselor),
-        date=today
+    # Get pending leave applications for the New tab
+    pending_leaves = StudentLeave.objects.filter(
+        student__in=students,
+        status='Pending'
     ).order_by('-created_at')  # Most recent first
 
-    # Get all leave applications for records
-    all_leaves = StudentLeave.objects.filter(
-        student__in=Student.objects.filter(counselor=counselor)
+    # Get all non-pending leave applications for the Records tab
+    processed_leaves = StudentLeave.objects.filter(
+        student__in=students
+    ).exclude(
+        status='Pending'
     ).order_by('-created_at')  # Most recent first
 
-    # Flag old pending applications
-    for leave in today_leaves:
-        if leave.created_at < one_day_ago:
-            leave.is_old = True
-        else:
-            leave.is_old = False
+    print(f"Found {pending_leaves.count()} pending leave applications")
+    print(f"Found {processed_leaves.count()} processed leave applications")
 
     context = {
         'counselor': counselor,
-        'today_leaves': today_leaves,
-        'all_leaves': all_leaves,
-        'one_day_ago': one_day_ago,
+        'today_leaves': pending_leaves,
+        # Renamed from 'today_leaves' but keeping the variable for template compatibility
+        'all_leaves': processed_leaves,
     }
 
     return render(request, 'counselor_leave.html', context)
 
+
 @login_required
 def update_leave_status(request):
-    """Handle leave status updates (approve/reject/reset)"""
-    if request.method == 'POST':
+    """
+    Simplified view to handle leave status updates.
+    No Reset functionality - only approving or rejecting is allowed.
+    """
+    print("===== UPDATE LEAVE STATUS VIEW CALLED =====")
+    print(f"Request method: {request.method}")
+
+    # Get parameters from either GET or POST
+    if request.method == 'GET':
+        leave_id = request.GET.get('leave_id')
+        new_status = request.GET.get('status')
+    elif request.method == 'POST':
         leave_id = request.POST.get('leave_id')
         new_status = request.POST.get('status')
+    else:
+        messages.error(request, "Invalid request method")
+        return redirect('counselor_leave')
 
-        # Debug print
-        print(f"Updating leave {leave_id} to status {new_status}")
+    print(f"Parameters: leave_id={leave_id}, new_status={new_status}")
 
-        if not leave_id or leave_id == 'null':
-            return JsonResponse({'success': False, 'message': 'Invalid leave ID'}, status=400)
+    # Validate the parameters
+    if not leave_id or not new_status:
+        messages.error(request, "Missing required parameters")
+        return redirect('counselor_leave')
 
-        try:
-            leave = get_object_or_404(StudentLeave, id=leave_id)
-            counselor = get_object_or_404(Counselor, user=request.user)
+    # Only allow Approved or Rejected status changes (no Reset to Pending)
+    if new_status not in ['Approved', 'Rejected']:
+        messages.error(request, "Invalid status value")
+        return redirect('counselor_leave')
 
-            if leave.student.counselor != counselor:
-                return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
+    try:
+        # Get the leave record
+        leave = StudentLeave.objects.get(id=leave_id)
+        print(f"Found leave record: {leave}")
 
-            # Check time restrictions - 24 hours for moving to Records
-            one_day_ago = timezone.now() - timedelta(days=1)
-            if leave.created_at < one_day_ago and new_status == 'Pending':
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Cannot reset applications older than 24 hours'
-                }, status=400)
+        # Get the counselor
+        counselor = get_object_or_404(Counselor, user=request.user)
+        print(f"Found counselor: {counselor}")
 
-            # Check if status is being changed from Approved/Rejected to Pending (a reset operation)
-            if leave.status != 'Pending' and new_status == 'Pending':
-                # Check if within 15 minute window
-                fifteen_min_ago = timezone.now() - timedelta(minutes=15)
+        # Security check - ensure counselor is allowed to update this leave
+        if leave.student.counselor != counselor:
+            messages.error(request, "You are not authorized to update this leave application")
+            return redirect('counselor_leave')
 
-                # Find any existing CounselorLeave records
-                existing_records = CounselorLeave.objects.filter(
-                    counselor=counselor,
-                    student=leave.student
-                )
+        # Ensure the leave is in Pending status before allowing changes
+        if leave.status != 'Pending':
+            messages.error(request, "Only pending leave applications can be updated")
+            return redirect('counselor_leave')
 
-                if existing_records.exists() and existing_records.first().updated_at < fifteen_min_ago:
-                    return JsonResponse({
-                        'success': False,
-                        'message': 'Cannot reset status after 15 minutes'
-                    }, status=400)
+        # Record old status for messaging
+        old_status = leave.status
 
-            # Update the StudentLeave record
-            leave.status = new_status
-            leave.save()
+        # Update the leave status
+        leave.status = new_status
+        leave.save()
 
-            # Create or update CounselorLeave record - THIS IS THE KEY FIX
-            # First, delete any existing records for this student-counselor pair
-            CounselorLeave.objects.filter(
-                counselor=counselor,
-                student=leave.student
-            ).delete()
+        # Verify the update was successful by refreshing from DB
+        leave.refresh_from_db()
 
-            # Then create a new record
-            counselor_leave = CounselorLeave.objects.create(
-                counselor=counselor,
-                student=leave.student,
-                status=new_status,
-                updated_at=timezone.now()
-            )
+        if leave.status != new_status:
+            print(f"WARNING: Status update failed - DB still shows {leave.status} instead of {new_status}")
+            messages.error(request, "Status update failed - please try again")
+        else:
+            print(f"Successfully updated leave status from {old_status} to {new_status}")
 
-            print(f"Created CounselorLeave record: ID={counselor_leave.id}, Status={counselor_leave.status}")
+            # Customize message based on the action taken
+            if new_status == 'Approved':
+                messages.success(request, f"Leave application for {leave.student.roll_number} has been approved")
+            elif new_status == 'Rejected':
+                messages.success(request, f"Leave application for {leave.student.roll_number} has been rejected")
 
-            return JsonResponse({'success': True})
+    except StudentLeave.DoesNotExist:
+        print(f"Error: Leave record with ID {leave_id} not found")
+        messages.error(request, "Leave application not found")
+    except Exception as e:
+        print(f"Error updating leave status: {str(e)}")
+        print(f"Exception type: {type(e).__name__}")
+        import traceback
+        print(traceback.format_exc())
+        messages.error(request, f"Error updating leave status: {str(e)}")
 
-        except Exception as e:
-            print(f"Error updating leave status: {str(e)}")
-            return JsonResponse({'success': False, 'message': str(e)}, status=500)
-
-    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+    return redirect('counselor_leave')
 
 @login_required
 def filter_leaves(request):
@@ -533,45 +553,42 @@ def filter_leaves(request):
         year = request.GET.get('year', '')
 
         counselor = get_object_or_404(Counselor, user=request.user)
+        students = Student.objects.filter(counselor=counselor)
 
-        # Start with all leaves for this counselor
-        leaves = StudentLeave.objects.filter(
-            student__in=Student.objects.filter(counselor=counselor)
+        # Get pending leaves (for New tab)
+        pending_leaves = StudentLeave.objects.filter(
+            student__in=students,
+            status='Pending'
         )
 
-        # Apply filters
+        # Start with all processed leaves (non-pending) for Records tab
+        processed_leaves = StudentLeave.objects.filter(
+            student__in=students
+        ).exclude(
+            status='Pending'
+        )
+
+        # Apply search term filter to processed leaves if provided
         if search_term:
-            leaves = leaves.filter(
+            processed_leaves = processed_leaves.filter(
                 Q(student__user__username__icontains=search_term) |
                 Q(student__roll_number__icontains=search_term)
             )
 
+        # Apply date filters if provided
         if month and month != 'Select':
-            leaves = leaves.filter(date__month=month)
+            processed_leaves = processed_leaves.filter(date__month=month)
         if year and year != 'Select':
-            leaves = leaves.filter(date__year=year)
+            processed_leaves = processed_leaves.filter(date__year=year)
 
-        # Get today's leaves separately for the top section
-        today = timezone.now().date()
-        twelve_hours_ago = timezone.now() - timedelta(hours=12)
-
-        today_leaves = StudentLeave.objects.filter(
-            student__in=Student.objects.filter(counselor=counselor),
-            date=today
-        ).order_by('-created_at')  # Most recent first
-
-        # Flag old pending applications
-        for leave in today_leaves:
-            if leave.status == 'Pending' and leave.created_at < twelve_hours_ago:
-                leave.is_old = True
-            else:
-                leave.is_old = False
+        # Order the results by most recent first
+        pending_leaves = pending_leaves.order_by('-created_at')
+        processed_leaves = processed_leaves.order_by('-created_at')
 
         context = {
             'counselor': counselor,
-            'today_leaves': today_leaves,
-            'all_leaves': leaves.order_by('-created_at'),  # Most recent first
-            'twelve_hours_ago': twelve_hours_ago,
+            'today_leaves': pending_leaves,  # Keep the variable name for template compatibility
+            'all_leaves': processed_leaves,
             'search_term': search_term,
             'month': month,
             'year': year

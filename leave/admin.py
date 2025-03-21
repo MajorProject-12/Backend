@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import StudentLeave, CounselorLeave
+from .models import StudentLeave
 
 admin.site.register(StudentLeave)
-admin.site.register(CounselorLeave)
+# admin.site.register(CounselorLeave)
