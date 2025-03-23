@@ -1,10 +1,10 @@
-<!--student_check_in.html-->
+<!--templates/student_check_in.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Check In</title>
     {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,29 +13,17 @@
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <script src="{% static 'js/header.js' %}"></script>
-    <script src="{% static 'js/home.js' %}"></script>
-<!--    <script src="{% static 'js/student_check_in.js' %}"></script>-->
-
+    <script src="{% static 'js/student_check_in.js' %}"></script>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
-<!--    {% if messages %}-->
-<!--        <div class="messages">-->
-<!--            {% for message in messages %}-->
-<!--            <div class="message {{ message.tags }}">-->
-<!--                {{ message }}-->
-<!--            </div>-->
-<!--            {% endfor %}-->
-<!--        </div>-->
-<!--    {% endif %}-->
     <header>
         <div class="logo-container">
             <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
         </div>
         <nav class="nav-content">
             <div class="nav-links">
-                <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
-                <a href="#" class="nav-item" id="nav-item1">Check In</a>
-                <a href="{% url 'student_statistics' %}" class="nav-item" id="nav-item2">Statistics</a>
+                <a href="{% url 'student_dashboard' %}" class="nav-item">Dashboard</a>
+                <a href="#" class="nav-item active" id="nav-item1">Check In</a>
                 <a href="{% url 'student_remarks' %}" class="nav-item" id="nav-item3">Remarks</a>
                 <a href="{% url 'student_leave' %}" class="nav-item" id="nav-item4">Leave Application</a>
                 <a href="{% url 'student_weekly_reports' %}" class="nav-item" id="nav-item5">Weekly Report</a>
@@ -63,66 +51,452 @@
 
         <div class="burger-dropdown" id="burger-dropdown">
             <h2>Menu</h2>
+            <a class="menu-item" href="{% url 'student_dashboard' %}">Dashboard</a>
             <a class="menu-item" href="#">Check In</a>
-            <a class="menu-item" href="#">Statistics</a>
-            <a class="menu-item" href="#">Remarks</a>
-            <a class="menu-item" href="#">Leave Application</a>
+            <a class="menu-item" href="{% url 'student_remarks' %}">Remarks</a>
+            <a class="menu-item" href="{% url 'student_leave' %}">Leave Application</a>
+            <a class="menu-item" href="{% url 'student_weekly_reports' %}">Weekly Report</a>
             <hr>
             <a class="menu-item" href="{% url 'profile' %}">Profile</a>
             <a class="menu-item" href="#">Settings</a>
             <div class="footer">
-                <span>FAQs</span>
-                <a href="{% url 'logout' %}">Sign out</a>
+                <a href="#" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
             </div>
         </div>
 
         <div class="profile-container" id="profile-container">
-        <div class="profile" id="profile">
-            <img alt="User  profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
-            <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
-        </div>
-        <div class="dropdown-menu" id="dropdown-menu">
-            <h2>Hello <br> {{ student.user.username }}!</h2>
-            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
-            <a class="menu-item" href="#">Settings</a>
-            <div class="footer">
-                <span>FAQs</span>
-                <a href="{% url 'logout' %}">Sign out</a>
+            <div class="profile" id="profile">
+                <img alt="User profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+                <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu">
+                <h2>Hello <br> {{ student.user.username }}!</h2>
+                <a class="menu-item" href="{% url 'profile' %}">Profile</a>
+                <a class="menu-item" href="#">Settings</a>
+                <div class="footer">
+                    <a href="#" id="faqs"><span>FAQs</span></a>
+                    <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+                </div>
             </div>
         </div>
-    </div>
     </header>
+
     <div class="content-background">
-    <main class="content-wrapper">
-        <div class="content">
-
-            <div class="scanner">
-                <div class="scanner-wrapper">
-                    <div class="face-scanner">
-                        <div class="scanner-view">
-                            <video id="video" autoplay style="display: none;" width="100%" height="100%"></video>
-                            <img loading="lazy" src="{% static 'images/icons/face-scan-white.svg' %}" class="scanner-icon" alt="Face Scanner Interface" />
+        <main class="content-wrapper">
+            <div class="content">
+                <div class="scanner">
+                    <div class="scanner-wrapper">
+                        <div class="face-scanner">
+                            <div class="scanner-view">
+                                <video id="video" autoplay style="display: none;" width="100%" height="100%"></video>
+                                <img loading="lazy" src="{% static 'images/icons/face-scan-white.svg' %}" class="scanner-icon" alt="Face Scanner Interface" />
+                            </div>
+                            <div class="greeting-text">Hello <br> {{ student.user.username }}!</div>
+                            <!-- Message div will be added by JavaScript -->
+                            <button class="scan-button">
+                                <span>Scan</span>
+                                <img loading="lazy" src="{% static 'images/icons/photo-capture.svg' %}" class="scan-icon-btn" alt="" />
+                            </button>
                         </div>
-                        <div class="greeting-text">Hello <br> {{ student.user.username }}!</div>
-                        <button class="scan-button">
-                            <span>Scan</span>
-                            <img loading="lazy" src="{% static 'images/icons/photo-capture.svg' %}" class="scan-icon" alt="" />
-                        </button>
+                    </div>
+                </div>
+
+                <div class="info">
+                    <div class="info-wrapper">
+                        <div class="info-content">
+                            <h1 class="page-title">Attendance<br>Check In</h1>
+                            <p class="attendance-date">{{ today_date }}</p>
+                            {% if today_status %}
+                                <div class="attendance-status">
+                                    <p>Today's Status: <span class="status-badge {% if today_status == 'Present' %}present{% else %}absent{% endif %}">{{ today_status }}</span></p>
+                                </div>
+                            {% endif %}
+                            <img loading="lazy" src="{% static 'images/illustrations/frs.svg' %}" class="info-image" alt="Attendance Information Display" />
+                        </div>
                     </div>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <div class="info">
-                <div class="info-wrapper">
-                    <div class="info-content">
-                        <h1 class="page-title">Attendance<br>Check In</h1>
-                        <img loading="lazy" src="{% static 'images/illustrations/frs.svg' %}" class="info-image" alt="Attendance Information Display" />
-                    </div>
-                </div>
-            </div>
+    <style>
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .present {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .absent {
+            background-color: #F44336;
+            color: white;
+        }
+        .attendance-date {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #666;
+        }
+        .attendance-status {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+    </style>
 
-        </div>
-    </main>
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    // Get DOM elements
+    const video = document.getElementById('video');
+    const scanButton = document.querySelector('.scan-button');
+    const scannerIcon = document.querySelector('.scanner-icon');
+    const greetingText = document.querySelector('.greeting-text');
+
+    // Create message element
+    const messageDiv = document.createElement('div');
+    messageDiv.id = 'message';
+    messageDiv.className = 'alert-message d-none';
+    document.querySelector('.face-scanner').appendChild(messageDiv);
+
+    // Function to check if face is registered
+    function checkRegistrationStatus() {
+        console.log("Checking face registration status...");
+        displayMessage("Checking registration status...");
+
+        fetch('/check_registration/')
+            .then(response => {
+                console.log("Registration status response:", response.status);
+                if (!response.ok) {
+                    throw new Error('Server returned ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Registration status data:", data);
+                if (data.is_registered) {
+                    scanButton.disabled = false;
+                    displayMessage("Face is registered. You can mark attendance.");
+                } else {
+                    scanButton.disabled = true;
+                    displayMessage("Face not registered. Please register your face in your profile first.");
+                }
+            })
+            .catch(error => {
+                console.error('Error checking registration status:', error);
+                displayMessage('Unable to check registration status. ' + error.message);
+            });
+    }
+
+    // Function to start the webcam
+    function startWebcam() {
+        console.log("Starting webcam...");
+        displayMessage("Starting camera...");
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.error("Media devices API not supported");
+            displayMessage('Your browser does not support camera access.');
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                width: { ideal: 640 },
+                height: { ideal: 480 },
+                facingMode: "user"
+            }
+        })
+        .then((stream) => {
+            console.log("Webcam started successfully");
+            video.srcObject = stream;
+            video.style.display = 'block';
+            scannerIcon.style.display = 'none';
+
+            // Make sure video is ready before capturing
+            video.onloadedmetadata = function() {
+                console.log("Video metadata loaded, dimensions:", video.videoWidth, "x", video.videoHeight);
+            };
+        })
+        .catch((error) => {
+            console.error("Error accessing webcam: ", error);
+            displayMessage('Unable to access webcam: ' + error.message);
+        });
+    }
+
+    // Function to stop the webcam
+    function stopWebcam() {
+        console.log("Stopping webcam...");
+        if (video.srcObject) {
+            const tracks = video.srcObject.getTracks();
+            tracks.forEach(track => {
+                track.stop();
+                console.log("Track stopped:", track.kind);
+            });
+            video.srcObject = null;
+            video.style.display = 'none';
+            scannerIcon.style.display = 'block';
+        }
+    }
+
+    // Function to capture image
+    function captureImage() {
+        console.log("Capturing image...");
+        try {
+            if (!video.videoWidth) {
+                console.error("Video not ready yet");
+                displayMessage("Camera not ready. Please wait a moment.");
+                return null;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            console.log("Canvas dimensions:", canvas.width, "x", canvas.height);
+
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL('image/jpeg', 0.9);
+            console.log("Image captured, data length:", imageData.length);
+
+            return imageData;
+        } catch (error) {
+            console.error("Error capturing image:", error);
+            displayMessage("Error capturing image: " + error.message);
+            return null;
+        }
+    }
+
+    // Function to mark attendance
+    function markAttendance(imageData) {
+        if (!imageData) {
+            displayMessage("No image captured. Please try again.");
+            return;
+        }
+
+        console.log("Sending attendance data...");
+        displayMessage('Processing attendance... Please wait');
+
+        fetch('/mark_attendance/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ image: imageData })
+        })
+        .then(response => {
+            console.log("Attendance response status:", response.status);
+            if (!response.ok) {
+                throw new Error('Server returned ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Attendance response:", data);
+
+            if (data.success) {
+                // Success animation
+                greetingText.innerHTML = "Attendance<br>Marked!";
+                greetingText.style.color = "#4CAF50";
+                displayMessage(data.message || 'Attendance marked successfully!');
+            } else {
+                // Error message
+                displayMessage(data.message || 'Failed to mark attendance');
+            }
+
+            // Stop the webcam after processing
+            setTimeout(() => {
+                stopWebcam();
+                // Reset greeting text after a delay
+                setTimeout(() => {
+                    greetingText.innerHTML = document.querySelector('.greeting-text').getAttribute('data-original-text') || "Hello!";
+                    greetingText.style.color = "";
+                }, 3000);
+            }, 1000);
+        })
+        .catch(error => {
+            console.error('Error during attendance marking:', error);
+            displayMessage('Error: ' + error.message);
+            setTimeout(() => {
+                stopWebcam();
+            }, 1000);
+        });
+    }
+
+    // Event listener for scan button
+    scanButton.addEventListener('click', () => {
+        // Store original greeting text if not already stored
+        if (!greetingText.getAttribute('data-original-text')) {
+            greetingText.setAttribute('data-original-text', greetingText.innerHTML);
+        }
+
+        startWebcam();
+        displayMessage('Position your face in the frame. Capturing in 5 seconds...');
+
+        // Wait to ensure webcam is initialized
+        setTimeout(() => {
+            displayMessage('Capturing image for attendance...');
+            const imageData = captureImage();
+            if (imageData) {
+                markAttendance(imageData);
+            } else {
+                displayMessage('Failed to capture image. Please try again.');
+                stopWebcam();
+            }
+        }, 5000);
+    });
+
+    // Function to display messages
+    function displayMessage(message) {
+        console.log("Message:", message);
+        if (messageDiv) {
+            messageDiv.textContent = message;
+            messageDiv.classList.remove('d-none');
+
+            // Don't auto-hide error messages
+            if (!message.includes('error') && !message.includes('failed') && !message.includes('Unable')) {
+                setTimeout(() => {
+                    messageDiv.classList.add('d-none');
+                }, 5000);
+            }
+        }
+    }
+
+    // Utility function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Add some basic styling for message div
+    const style = document.createElement('style');
+    style.textContent = `
+        .alert-message {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-align: center;
+            font-size: 14px;
+        }
+        .d-none {
+            display: none;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Check registration status on page load
+    checkRegistrationStatus();
+});
+        // Add this to your JavaScript file that handles attendance
+
+async function captureFramesForAttendance() {
+    // Get video element
+    const video = document.getElementById('video');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Collection of frames (base64 encoded)
+    const frames = [];
+
+    // Status element (can be any element that shows status)
+    const statusElement = document.getElementById('status-message') || document.createElement('div');
+    statusElement.textContent = 'Capturing frames for liveness detection...';
+
+    try {
+        // Capture 8-10 frames over 2-3 seconds for proper liveness detection
+        const totalFrames = 8;
+        for (let i = 0; i < totalFrames; i++) {
+            // Draw current video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert to base64
+            const frameDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            frames.push(frameDataUrl);
+
+            // Update status
+            statusElement.textContent = `Capturing frames for verification: ${i+1}/${totalFrames}`;
+
+            // Wait a bit before next capture (300ms intervals)
+            // This interval is important for detecting natural movement and blinks
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            // For the last few frames, instruct the user to blink for liveness detection
+            if (i === Math.floor(totalFrames/2)) {
+                statusElement.textContent = 'Please blink naturally for verification...';
+                // Wait a bit longer to give time for blinking
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+
+        statusElement.textContent = 'Processing verification...';
+
+        // Now submit frames to the server
+        const response = await fetch('/attendance/mark-attendance/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken() // Function to get CSRF token
+            },
+            body: JSON.stringify({ frames: frames })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            statusElement.textContent = result.message;
+            statusElement.className = 'success-message';
+
+            // Additional UI updates on success
+            const attendanceStatus = document.getElementById('attendance-status');
+            if (attendanceStatus) {
+                attendanceStatus.textContent = 'Present';
+                attendanceStatus.className = 'status-present';
+            }
+        } else {
+            statusElement.textContent = result.message;
+            statusElement.className = 'error-message';
+        }
+
+    } catch (error) {
+        console.error('Error capturing frames:', error);
+        statusElement.textContent = 'Error: ' + error.message;
+        statusElement.className = 'error-message';
+    }
+}
+
+// Helper function to get CSRF token
+function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+// Example of how to attach this to your attendance button
+document.addEventListener('DOMContentLoaded', function() {
+    const attendanceButton = document.getElementById('mark-attendance-btn');
+    if (attendanceButton) {
+        attendanceButton.addEventListener('click', function() {
+            captureFramesForAttendance();
+        });
+    }
+});
+    </script>
 </body>
 </html>

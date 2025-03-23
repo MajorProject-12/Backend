@@ -19,7 +19,6 @@ class Attendance(models.Model):
     class Meta:
         unique_together = ('student', 'date')  # ✅ Ensures attendance is marked only once per student per day
 
-
 class FaceRegistration(models.Model):
     student = models.OneToOneField("authentication.Student", on_delete=models.CASCADE)  # ✅ Lazy import
     face_features = models.BinaryField(null=True, blank=True)  
