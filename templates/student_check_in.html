@@ -139,7 +139,7 @@
         .attendance-date {
             margin-top: 10px;
             font-size: 18px;
-            color: #666;
+            color: #ffffff;
         }
         .attendance-status {
             margin-top: 10px;
@@ -148,7 +148,8 @@
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // Updated student_check_in.js with video streaming functionality
+document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
     const video = document.getElementById('video');
     const scanButton = document.querySelector('.scan-button');
@@ -160,6 +161,12 @@
     messageDiv.id = 'message';
     messageDiv.className = 'alert-message d-none';
     document.querySelector('.face-scanner').appendChild(messageDiv);
+
+    // Video streaming variables
+    let mediaStream = null;
+    let isStreaming = false;
+    let streamInterval = null;
+    const frameSendInterval = 200; // Send frames every 200ms
 
     // Function to check if face is registered
     function checkRegistrationStatus() {
@@ -190,7 +197,7 @@
             });
     }
 
-    // Function to start the webcam
+    // Function to start the webcam stream
     function startWebcam() {
         console.log("Starting webcam...");
         displayMessage("Starting camera...");
@@ -198,10 +205,10 @@
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             console.error("Media devices API not supported");
             displayMessage('Your browser does not support camera access.');
-            return;
+            return Promise.reject('Media devices not supported');
         }
 
-        navigator.mediaDevices.getUserMedia({
+        return navigator.mediaDevices.getUserMedia({
             video: {
                 width: { ideal: 640 },
                 height: { ideal: 480 },
@@ -210,43 +217,68 @@
         })
         .then((stream) => {
             console.log("Webcam started successfully");
+            mediaStream = stream;
             video.srcObject = stream;
             video.style.display = 'block';
             scannerIcon.style.display = 'none';
 
-            // Make sure video is ready before capturing
-            video.onloadedmetadata = function() {
-                console.log("Video metadata loaded, dimensions:", video.videoWidth, "x", video.videoHeight);
-            };
+            // Make sure video is ready
+            return new Promise((resolve) => {
+                video.onloadedmetadata = function() {
+                    console.log("Video metadata loaded, dimensions:", video.videoWidth, "x", video.videoHeight);
+                    resolve(stream);
+                };
+            });
         })
         .catch((error) => {
             console.error("Error accessing webcam: ", error);
             displayMessage('Unable to access webcam: ' + error.message);
+            return Promise.reject(error);
         });
     }
 
     // Function to stop the webcam
     function stopWebcam() {
         console.log("Stopping webcam...");
-        if (video.srcObject) {
-            const tracks = video.srcObject.getTracks();
+        if (mediaStream) {
+            const tracks = mediaStream.getTracks();
             tracks.forEach(track => {
                 track.stop();
                 console.log("Track stopped:", track.kind);
             });
+            mediaStream = null;
             video.srcObject = null;
             video.style.display = 'none';
             scannerIcon.style.display = 'block';
         }
+
+        // Also stop the streaming interval
+        if (streamInterval) {
+            clearInterval(streamInterval);
+            streamInterval = null;
+        }
+
+        // Notify the server to clean up resources
+        fetch('/stop_video_stream/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ stop: true })
+        }).catch(error => {
+            console.error('Error stopping stream on server:', error);
+        });
+
+        isStreaming = false;
     }
 
-    // Function to capture image
+    // Function to capture image from video
     function captureImage() {
         console.log("Capturing image...");
         try {
             if (!video.videoWidth) {
                 console.error("Video not ready yet");
-                displayMessage("Camera not ready. Please wait a moment.");
                 return null;
             }
 
@@ -258,71 +290,94 @@
             const context = canvas.getContext('2d');
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const imageData = canvas.toDataURL('image/jpeg', 0.9);
+            const imageData = canvas.toDataURL('image/jpeg', 0.85);
             console.log("Image captured, data length:", imageData.length);
 
             return imageData;
         } catch (error) {
             console.error("Error capturing image:", error);
-            displayMessage("Error capturing image: " + error.message);
             return null;
         }
     }
 
-    // Function to mark attendance
-    function markAttendance(imageData) {
+    // Function to send a single frame to the server
+    function sendFrame() {
+        if (!isStreaming) return;
+
+        const imageData = captureImage();
         if (!imageData) {
-            displayMessage("No image captured. Please try again.");
+            console.error("Failed to capture frame");
             return;
         }
 
-        console.log("Sending attendance data...");
-        displayMessage('Processing attendance... Please wait');
-
-        fetch('/mark_attendance/', {
+        fetch('/receive_video_frame/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCookie('csrftoken'),
             },
-            body: JSON.stringify({ image: imageData })
+            body: JSON.stringify({ frame: imageData })
+        })
+        .then(response => response.json())
+        .catch(error => {
+            console.error('Error sending frame:', error);
+        });
+    }
+
+    // Function to start streaming video frames to the server
+    function startStreaming() {
+        if (isStreaming) return;
+
+        isStreaming = true;
+        // Send frames at regular intervals
+        streamInterval = setInterval(sendFrame, frameSendInterval);
+        console.log("Started streaming frames to server");
+    }
+
+    // Function to verify attendance with collected frames
+    function verifyAttendance() {
+        displayMessage('Processing attendance... Please wait');
+
+        fetch('/start_attendance_verification/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ verify: true })
         })
         .then(response => {
-            console.log("Attendance response status:", response.status);
+            console.log("Attendance verification response status:", response.status);
             if (!response.ok) {
                 throw new Error('Server returned ' + response.status);
             }
             return response.json();
         })
         .then(data => {
-            console.log("Attendance response:", data);
+            console.log("Attendance verification response:", data);
 
             if (data.success) {
                 // Success animation
                 greetingText.innerHTML = "Attendance<br>Marked!";
                 greetingText.style.color = "#4CAF50";
                 displayMessage(data.message || 'Attendance marked successfully!');
+
+                // Reload the page after a delay to show updated status
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
             } else {
                 // Error message
                 displayMessage(data.message || 'Failed to mark attendance');
             }
 
-            // Stop the webcam after processing
-            setTimeout(() => {
-                stopWebcam();
-                // Reset greeting text after a delay
-                setTimeout(() => {
-                    greetingText.innerHTML = document.querySelector('.greeting-text').getAttribute('data-original-text') || "Hello!";
-                    greetingText.style.color = "";
-                }, 3000);
-            }, 1000);
+            // Stop the webcam and streaming
+            stopWebcam();
         })
         .catch(error => {
-            console.error('Error during attendance marking:', error);
+            console.error('Error during attendance verification:', error);
             displayMessage('Error: ' + error.message);
-            setTimeout(() => {
-                stopWebcam();
-            }, 1000);
+            stopWebcam();
         });
     }
 
@@ -333,20 +388,32 @@
             greetingText.setAttribute('data-original-text', greetingText.innerHTML);
         }
 
-        startWebcam();
-        displayMessage('Position your face in the frame. Capturing in 5 seconds...');
+        // Start the process
+        startWebcam()
+            .then(() => {
+                displayMessage('Position your face in the frame. Starting verification...');
+                startStreaming();
 
-        // Wait to ensure webcam is initialized
-        setTimeout(() => {
-            displayMessage('Capturing image for attendance...');
-            const imageData = captureImage();
-            if (imageData) {
-                markAttendance(imageData);
-            } else {
-                displayMessage('Failed to capture image. Please try again.');
-                stopWebcam();
-            }
-        }, 5000);
+                // Collect frames for several seconds before verification
+                const collectionTime = 8000; // 8 seconds of video capture
+                setTimeout(() => {
+                    displayMessage('Analyzing facial data for attendance...');
+
+                    // Stop streaming but keep camera on while processing
+                    isStreaming = false;
+                    if (streamInterval) {
+                        clearInterval(streamInterval);
+                        streamInterval = null;
+                    }
+
+                    // Start the verification process
+                    verifyAttendance();
+                }, collectionTime);
+            })
+            .catch(error => {
+                console.error("Failed to start webcam for attendance:", error);
+                displayMessage("Failed to start camera. Please check permissions and try again.");
+            });
     });
 
     // Function to display messages
@@ -401,101 +468,6 @@
 
     // Check registration status on page load
     checkRegistrationStatus();
-});
-        // Add this to your JavaScript file that handles attendance
-
-async function captureFramesForAttendance() {
-    // Get video element
-    const video = document.getElementById('video');
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // Collection of frames (base64 encoded)
-    const frames = [];
-
-    // Status element (can be any element that shows status)
-    const statusElement = document.getElementById('status-message') || document.createElement('div');
-    statusElement.textContent = 'Capturing frames for liveness detection...';
-
-    try {
-        // Capture 8-10 frames over 2-3 seconds for proper liveness detection
-        const totalFrames = 8;
-        for (let i = 0; i < totalFrames; i++) {
-            // Draw current video frame to canvas
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Convert to base64
-            const frameDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-            frames.push(frameDataUrl);
-
-            // Update status
-            statusElement.textContent = `Capturing frames for verification: ${i+1}/${totalFrames}`;
-
-            // Wait a bit before next capture (300ms intervals)
-            // This interval is important for detecting natural movement and blinks
-            await new Promise(resolve => setTimeout(resolve, 300));
-
-            // For the last few frames, instruct the user to blink for liveness detection
-            if (i === Math.floor(totalFrames/2)) {
-                statusElement.textContent = 'Please blink naturally for verification...';
-                // Wait a bit longer to give time for blinking
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-        }
-
-        statusElement.textContent = 'Processing verification...';
-
-        // Now submit frames to the server
-        const response = await fetch('/attendance/mark-attendance/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken() // Function to get CSRF token
-            },
-            body: JSON.stringify({ frames: frames })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            statusElement.textContent = result.message;
-            statusElement.className = 'success-message';
-
-            // Additional UI updates on success
-            const attendanceStatus = document.getElementById('attendance-status');
-            if (attendanceStatus) {
-                attendanceStatus.textContent = 'Present';
-                attendanceStatus.className = 'status-present';
-            }
-        } else {
-            statusElement.textContent = result.message;
-            statusElement.className = 'error-message';
-        }
-
-    } catch (error) {
-        console.error('Error capturing frames:', error);
-        statusElement.textContent = 'Error: ' + error.message;
-        statusElement.className = 'error-message';
-    }
-}
-
-// Helper function to get CSRF token
-function getCsrfToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
-
-// Example of how to attach this to your attendance button
-document.addEventListener('DOMContentLoaded', function() {
-    const attendanceButton = document.getElementById('mark-attendance-btn');
-    if (attendanceButton) {
-        attendanceButton.addEventListener('click', function() {
-            captureFramesForAttendance();
-        });
-    }
 });
     </script>
 </body>
