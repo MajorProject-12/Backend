@@ -17,6 +17,7 @@
     <script src="{% static 'js/counselor_insights.js' %}"></script>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
+
     <header>
         <!-- Header content remains the same -->
         <div class="logo-container">
@@ -63,6 +64,16 @@
             <div class="sidebar">
                 <h2>Student<br>Insights</h2>
             </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    {% if messages %}
+        {% for message in messages %}
+            alert("{{ message|escapejs }}");
+        {% endfor %}
+    {% endif %}
+});
+</script>
+
 
             <div class="top-controls">
                 <div class="search-container">
@@ -77,6 +88,9 @@
             <div class="container-1">
                 <div class="info">
                     <h1>Assigned Students</h1>
+                    <div>
+                            <a href="{% url 'download_attendance' %}" class="download-btn">Download Attendance</a>
+        `           </div>
                 </div>
 
                 <table>
@@ -97,7 +111,7 @@
                             <td>{{ student.user.username }}</td>
                             <td>{{ student.latest_attendance }}</td>
                             <td>
-                                <button class="btn-add-remark
+                                <button id="remarks-btn" class="btn-add-remark
                                     {% if student.latest_attendance < 75 %}low-attendance
                                     {% elif student.latest_attendance > 75 %}good-attendance
                                     {% else %}warning-attendance{% endif %}"
@@ -143,5 +157,7 @@
 
         </main>
     </div>
+
+
 </body>
 </html>

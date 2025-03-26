@@ -76,3 +76,26 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let popupMessage = document.getElementById("popup-message");
+    let popupText = document.getElementById("popup-text");
+
+    {% if messages %}
+        {% for message in messages %}
+            setTimeout(() => {
+                popupText.innerText = "{{ message }}";
+                popupMessage.classList.add("show");
+
+                setTimeout(() => {
+                    popupMessage.classList.remove("show");
+                }, 3000);
+            }, 500);
+        {% endfor %}
+    {% endif %}
+});
+</script>
+
+

@@ -47,6 +47,22 @@ h1 {
   font-weight: bold;
 }
 
+#remarks-btn {
+   cursor: pointer;
+   display: inline-block;
+   padding: 5px 10px;
+   border: none;
+   border-radius: 5px;
+   background-color: #4CAF50;
+   color: #fff;
+   font-size: 16px;
+ }
+
+ #remarks-btn img {
+   margin-left: 5px;
+   vertical-align: middle;
+ }
+
 .form-group {
   margin-bottom: 20px;
 }
@@ -467,4 +483,19 @@ h4 span {
 
 .btn-add-remark.low-attendance:hover {
     animation: none;
+}
+
+.download-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.download-btn:hover {
+    background-color: #0056b3;
 }

@@ -2,23 +2,25 @@
 from django.contrib.auth import authenticate, login, logout
 import random
 import string
-from django.shortcuts import render, redirect
 from authentication.models import CustomUser
-from django.core.mail import send_mail
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.utils.text import capfirst
-from django.contrib import messages
-from django.shortcuts import get_object_or_404
 from remarks.models import CounselorRemark
-from authentication.models import Student, Counselor
-from attendance.models import Attendance
-from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Q
 from datetime import datetime, timedelta
-from reports.models import StudentWork, CounselorWork
+from reports.models import StudentWork
 from leave.models import StudentLeave
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from authentication.models import Counselor
+import pandas as pd
+from django.http import HttpResponse
+from io import BytesIO
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Student
 
 #############################################################
 #                   Student Views                           #
@@ -61,7 +63,6 @@ def login_view(request):
 
     return render(request, 'index.html')
 
-
 @login_required
 def student_check_in(request):
     student = request.user.student
@@ -69,7 +70,6 @@ def student_check_in(request):
         'student': student,
     }
     return render(request, 'student_check_in.html', context)
-
 
 @login_required
 def student_dashboard(request):
@@ -80,18 +80,15 @@ def student_dashboard(request):
     }
     return render(request, 'student_dashboard.html', context)
 
-
 def logout_view(request):
     request.session.flush()
     logout(request)
     messages.info(request, "You have been logged out successfully.")
     return redirect('login')
 
-
 def generate_otp():
     """Generate a 6-digit OTP"""
     return ''.join(random.choices(string.digits, k=6))
-
 
 def send_otp_email(email, otp):
     """Send OTP via email"""
@@ -106,7 +103,6 @@ def send_otp_email(email, otp):
     except Exception as e:
         print(f"Error sending email: {e}")
         return False
-
 
 def forgotpassword(request):
     # Get current stage from session, default to 'email'
@@ -165,7 +161,6 @@ def forgotpassword(request):
 
     return render(request, 'forget_password.html', {'stage': current_stage})
 
-
 @login_required
 def profile_view(request):
     try:
@@ -194,7 +189,6 @@ def profile_view(request):
         messages.error(request, "Error loading profile data.")
         return render(request, 'student_profile.html', {'error': str(e)})
 
-
 @login_required
 def update_profile(request):
     if request.method == 'POST':
@@ -215,7 +209,6 @@ def update_profile(request):
             messages.error(request, f'Error updating profile: {str(e)}')
         return redirect('profile')
     return redirect('profile')
-
 
 @login_required
 def student_statistics(request):
@@ -256,42 +249,79 @@ def student_leave(request):
     """View for student leave application page"""
     student = get_object_or_404(Student, user=request.user)
 
-    if request.method == 'POST':
-        date = request.POST.get('date')
-        reason = request.POST.get('reason')
-        no_of_days = request.POST.get('days')
+    if request.method == "POST":
+        date = request.POST.get("date")
+        reason = request.POST.get("reason")
+        no_of_days = request.POST.get("days")
 
-        # Create new leave application with Pending status
+        # Create leave request
         leave = StudentLeave.objects.create(
-            student=student,
-            date=date,
-            reason=reason,
-            no_of_days=no_of_days,
-            status='Pending'
+            student=student, date=date, reason=reason, no_of_days=no_of_days, status="Pending"
+        )
+
+        # Send Email Notification to Counselor with better formatting
+        counselor = student.counselor
+        counselor_email = counselor.user.email
+
+        # Create a well-structured HTML email
+        subject = f"New Leave Application from {student.user.username}"
+        html_message = f"""
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #4A90E2; color: white; padding: 10px 20px; border-radius: 5px 5px 0 0; }}
+                .content {{ padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
+                .footer {{ margin-top: 20px; font-size: 12px; color: #777; }}
+                .details {{ margin: 15px 0; }}
+                .label {{ font-weight: bold; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2>New Leave Application</h2>
+                </div>
+                <div class="content">
+                    <p>Dear {counselor.user.username},</p>
+
+                    <p>A new leave application has been submitted that requires your attention.</p>
+
+                    <div class="details">
+                        <p><span class="label">Student Name:</span> {student.user.username}</p>
+                        <p><span class="label">Roll Number:</span> {student.roll_number}</p>
+                        <p><span class="label">Leave Date:</span> {date}</p>
+                        <p><span class="label">Duration:</span> {no_of_days} day{'s' if int(no_of_days) > 1 else ''}</p>
+                        <p><span class="label">Reason:</span> {reason}</p>
+                    </div>
+
+                    <p>Please review this application at your earliest convenience through the counselor portal.</p>
+
+                    <p>Thank you,<br>
+                    Student Management System</p>
+                </div>
+                <div class="footer">
+                    <p>This is an automated message. Please do not reply to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        from email_utils import send_html_email
+        send_html_email(
+            subject=subject,
+            html_message=html_message,
+            recipient_list=[counselor_email],
+            from_email=settings.DEFAULT_FROM_EMAIL
         )
 
         messages.success(request, "Leave application submitted successfully!")
-        return redirect('student_leave')
+        return redirect("student_leave")
 
-    # Get all leave applications for this student - force database refresh
-    from django.db import connection
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT 1")  # Force connection refresh
-
-    # Query again with fresh connection
-    leave_records = StudentLeave.objects.filter(student=student).order_by('-date')
-
-    # Add debug output
-    print(f"Retrieved {leave_records.count()} leave records for student {student.roll_number}")
-    for record in leave_records:
-        print(f"Leave record - ID: {record.id}, Date: {record.date}, Status: {record.status}")
-
-    context = {
-        'student': student,
-        'leave_records': leave_records
-    }
-
-    return render(request, 'student_leave.html', context)
+    leave_records = StudentLeave.objects.filter(student=student).order_by("-date")
+    return render(request, "student_leave.html", {"student": student, "leave_records": leave_records})
 
 @login_required
 def student_weekly_report(request):
@@ -311,14 +341,77 @@ def student_weekly_report(request):
                 # Parse the date string into a date object
                 date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
 
-                # Create the StudentWork instance directly
+                # Create the StudentWork instance
                 work = StudentWork(
                     student=student,
-                    date=date_obj,  # Set the date value
+                    date=date_obj,
                     work_done=work_done
                 )
 
                 work.save()
+
+                # Send email notification to counselor
+                counselor = student.counselor
+                counselor_email = counselor.user.email
+
+                # Format the date for display
+                formatted_date = date_obj.strftime('%d %B, %Y')
+
+                # Create HTML email
+                subject = f"New Weekly Report from {student.user.username}"
+                html_message = f"""
+                <html>
+                <head>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                        .header {{ background-color: #4A90E2; color: white; padding: 10px 20px; border-radius: 5px 5px 0 0; }}
+                        .content {{ padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
+                        .footer {{ margin-top: 20px; font-size: 12px; color: #777; }}
+                        .details {{ margin: 15px 0; background-color: #f9f9f9; padding: 15px; border-radius: 5px; }}
+                        .label {{ font-weight: bold; }}
+                        .work-content {{ white-space: pre-line; }}
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h2>New Weekly Report Submission</h2>
+                        </div>
+                        <div class="content">
+                            <p>Dear {counselor.user.username},</p>
+
+                            <p>A new weekly report has been submitted by one of your assigned students:</p>
+
+                            <div class="details">
+                                <p><span class="label">Student Name:</span> {student.user.username}</p>
+                                <p><span class="label">Roll Number:</span> {student.roll_number}</p>
+                                <p><span class="label">Report Date:</span> {formatted_date}</p>
+                                <p><span class="label">Work Done:</span></p>
+                                <div class="work-content">{work_done}</div>
+                            </div>
+
+                            <p>You can view all student reports through the counselor portal.</p>
+
+                            <p>Thank you,<br>
+                            Student Management System</p>
+                        </div>
+                        <div class="footer">
+                            <p>This is an automated message. Please do not reply to this email.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+
+                from email_utils import send_html_email
+                send_html_email(
+                    subject=subject,
+                    html_message=html_message,
+                    recipient_list=[counselor_email],
+                    from_email=settings.DEFAULT_FROM_EMAIL
+                )
+
                 messages.success(request, "Weekly report submitted successfully.")
                 return redirect('student_weekly_reports')
             except ValueError:
@@ -338,6 +431,15 @@ def student_weekly_report(request):
 
     return render(request, 'student_weekly_reports.html', context)
 
+def student_DocRAG(request):
+    student = Student.objects.get(user=request.user)
+    context = {
+        'student': student,
+        # 'student_reports': student_reports,
+    }
+    return render(request, 'student_qabot.html', context)
+
+
 #############################################################
 #                  Counselor Views                          #
 #############################################################
@@ -350,80 +452,6 @@ def counselor_dashboard(request):
         'assigned_students': counselor.assigned_students.all(),
     }
     return render(request, 'counselor_dashboard.html', context)
-
-
-@login_required
-def student_insights(request):
-    # Get the counselor object for the current user
-    counselor = get_object_or_404(Counselor, user=request.user)
-
-    # Process remark submission if POST
-    if request.method == "POST":
-        student_roll = request.POST.get("student_id")
-        remark_text = request.POST.get("remarks", "").strip()
-
-        if student_roll and remark_text:
-            try:
-                student = Student.objects.get(roll_number=student_roll)
-
-                # # Debug information
-                # print(f"Creating remark for {student_roll}: {remark_text}")
-                # print(f"Student found: {student}")
-                # print(f"Counselor: {counselor}")
-
-                # Verify this student is assigned to the current counselor
-                if student.counselor == counselor:
-                    # Create the remark
-                    new_remark = CounselorRemark.objects.create(
-                        counselor=counselor,
-                        student=student,
-                        percentage=student.attendance_percentage,
-                        remarks=remark_text,
-                    )
-                    # print(f"Remark created: {new_remark}")
-                    messages.success(request, "Remark added successfully!")
-                    return redirect("counselor_insights")
-                else:
-                    # Handle case where student doesn't belong to this counselor
-                    messages.error(request, "You can only add remarks for your assigned students.")
-            except Student.DoesNotExist:
-                messages.error(request, f"Student with roll number {student_roll} not found")
-
-    # GET request: List assigned students and their attendance
-    students = Student.objects.filter(counselor=counselor).select_related("user")
-
-    # Make sure we have students to display
-    if not students.exists():
-        messages.info(request, "No students are currently assigned to you.")
-
-    # For each student, use their attendance_percentage field for display in the template
-    for student in students:
-        # Format attendance percentage for display (round to 2 decimal places)
-        student.latest_attendance = round(student.attendance_percentage, 2)
-        # Debug student information
-        # print(f"Student: {student.roll_number}, User: {student.user.first_name} {student.user.last_name}")
-
-    # Sort students: lower attendance come first
-    students = sorted(students, key=lambda s: s.latest_attendance)
-
-    # Server-side search filtering
-    search_query = request.GET.get("search", "")
-    if search_query:
-        filtered_students = []
-        for student in students:
-            full_name = f"{student.user.first_name} {student.user.last_name}".lower()
-            if (search_query.lower() in full_name or
-                    search_query.lower() in student.roll_number.lower()):
-                filtered_students.append(student)
-        students = filtered_students
-
-    context = {
-        "counselor": counselor,
-        "students": students,
-        "search_query": search_query,
-    }
-    return render(request, "counselor_insights.html", context)
-
 
 @login_required
 def counselor_leave(request):
@@ -458,91 +486,154 @@ def counselor_leave(request):
 
     return render(request, 'counselor_leave.html', context)
 
-
-@login_required
 def update_leave_status(request):
-    """
-    Simplified view to handle leave status updates.
-    No Reset functionality - only approving or rejecting is allowed.
-    """
-    print("===== UPDATE LEAVE STATUS VIEW CALLED =====")
-    print(f"Request method: {request.method}")
+    """View to update leave application status"""
+    # Check if user is authenticated and is a counselor
+    if not request.user.is_authenticated:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({"success": False, "message": "Authentication required"}, status=401)
+        return redirect('login')
 
-    # Get parameters from either GET or POST
-    if request.method == 'GET':
-        leave_id = request.GET.get('leave_id')
-        new_status = request.GET.get('status')
-    elif request.method == 'POST':
-        leave_id = request.POST.get('leave_id')
-        new_status = request.POST.get('status')
-    else:
-        messages.error(request, "Invalid request method")
-        return redirect('counselor_leave')
+    # Ensure the user is a counselor
+    try:
+        counselor = Counselor.objects.get(user=request.user)
+    except Counselor.DoesNotExist:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({"success": False, "message": "Not authorized"}, status=403)
+        messages.error(request, "You do not have permission to perform this action.")
+        return redirect('dashboard')  # Redirect to appropriate page
 
-    print(f"Parameters: leave_id={leave_id}, new_status={new_status}")
+    # Get request parameters
+    leave_id = request.GET.get('leave_id')
+    status = request.GET.get('status')
 
-    # Validate the parameters
-    if not leave_id or not new_status:
-        messages.error(request, "Missing required parameters")
-        return redirect('counselor_leave')
-
-    # Only allow Approved or Rejected status changes (no Reset to Pending)
-    if new_status not in ['Approved', 'Rejected']:
-        messages.error(request, "Invalid status value")
+    # Validate parameters
+    if not leave_id or not status or status not in ['Approved', 'Rejected']:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
+        messages.error(request, "Invalid request parameters.")
         return redirect('counselor_leave')
 
     try:
-        # Get the leave record
-        leave = StudentLeave.objects.get(id=leave_id)
-        print(f"Found leave record: {leave}")
+        # Get the leave application
+        leave_application = StudentLeave.objects.get(id=leave_id)
 
-        # Get the counselor
-        counselor = get_object_or_404(Counselor, user=request.user)
-        print(f"Found counselor: {counselor}")
-
-        # Security check - ensure counselor is allowed to update this leave
-        if leave.student.counselor != counselor:
-            messages.error(request, "You are not authorized to update this leave application")
+        # Check if this counselor is assigned to the student
+        if leave_application.student.counselor != counselor:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({"success": False, "message": "Not authorized to update this leave"}, status=403)
+            messages.error(request, "You are not authorized to update this leave application.")
             return redirect('counselor_leave')
 
-        # Ensure the leave is in Pending status before allowing changes
-        if leave.status != 'Pending':
-            messages.error(request, "Only pending leave applications can be updated")
+        # Check if leave is already processed
+        if leave_application.status != 'Pending':
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({"success": False, "message": "Leave application already processed"}, status=400)
+            messages.error(request, "This leave application has already been processed.")
             return redirect('counselor_leave')
 
-        # Record old status for messaging
-        old_status = leave.status
+        # Update the status
+        old_status = leave_application.status
+        leave_application.status = status
+        leave_application.save()
 
-        # Update the leave status
-        leave.status = new_status
-        leave.save()
+        # Send email notification to student
+        try:
+            student = leave_application.student
+            student_email = student.user.email
 
-        # Verify the update was successful by refreshing from DB
-        leave.refresh_from_db()
+            # Create HTML email based on approval status
+            subject = f"Leave Application {status}"
 
-        if leave.status != new_status:
-            print(f"WARNING: Status update failed - DB still shows {leave.status} instead of {new_status}")
-            messages.error(request, "Status update failed - please try again")
-        else:
-            print(f"Successfully updated leave status from {old_status} to {new_status}")
+            # Different message content based on status
+            if status == 'Approved':
+                status_color = '#28a745'  # Green for approved
+                status_message = "Your leave application has been approved by your counselor."
+                additional_info = "Please make necessary arrangements for any missed classes or assignments."
+            else:  # Rejected
+                status_color = '#dc3545'  # Red for rejected
+                status_message = "Your leave application has been rejected by your counselor."
+                additional_info = "If you have any questions about this decision, please contact your counselor directly."
 
-            # Customize message based on the action taken
-            if new_status == 'Approved':
-                messages.success(request, f"Leave application for {leave.student.roll_number} has been approved")
-            elif new_status == 'Rejected':
-                messages.success(request, f"Leave application for {leave.student.roll_number} has been rejected")
+            html_message = f"""
+            <html>
+            <head>
+                <style>
+                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                    .header {{ background-color: {status_color}; color: white; padding: 10px 20px; border-radius: 5px 5px 0 0; }}
+                    .content {{ padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
+                    .footer {{ margin-top: 20px; font-size: 12px; color: #777; }}
+                    .details {{ margin: 15px 0; }}
+                    .label {{ font-weight: bold; }}
+                    .status {{ color: {status_color}; font-weight: bold; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h2>Leave Application Update</h2>
+                    </div>
+                    <div class="content">
+                        <p>Dear {student.user.username},</p>
+
+                        <p>{status_message}</p>
+
+                        <div class="details">
+                            <p><span class="label">Leave Date:</span> {leave_application.date.strftime('%d/%m/%Y')}</p>
+                            <p><span class="label">Duration:</span> {leave_application.no_of_days} day{'s' if leave_application.no_of_days > 1 else ''}</p>
+                            <p><span class="label">Reason:</span> {leave_application.reason}</p>
+                            <p><span class="label">Status:</span> <span class="status">{status}</span></p>
+                        </div>
+
+                        <p>{additional_info}</p>
+
+                        <p>Thank you,<br>
+                        Student Management System</p>
+                    </div>
+                    <div class="footer">
+                        <p>This is an automated message. Please do not reply to this email.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+
+            from email_utils import send_html_email
+            send_html_email(
+                subject=subject,
+                html_message=html_message,
+                recipient_list=[student_email],
+                from_email=settings.DEFAULT_FROM_EMAIL
+            )
+        except Exception as email_error:
+            # Log email error but continue with the response
+            print(f"Error sending email notification: {str(email_error)}")
+
+        # Return success response
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                "success": True,
+                "message": f"Leave application {status.lower()} successfully",
+                "leave_id": leave_id,
+                "status": status
+            })
+
+        messages.success(request, f"Leave application has been {status.lower()} successfully.")
+        return redirect('counselor_leave')
 
     except StudentLeave.DoesNotExist:
-        print(f"Error: Leave record with ID {leave_id} not found")
-        messages.error(request, "Leave application not found")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({"success": False, "message": "Leave application not found"}, status=404)
+        messages.error(request, "Leave application not found.")
+        return redirect('counselor_leave')
     except Exception as e:
+        # Log the error
         print(f"Error updating leave status: {str(e)}")
-        print(f"Exception type: {type(e).__name__}")
-        import traceback
-        print(traceback.format_exc())
-        messages.error(request, f"Error updating leave status: {str(e)}")
-
-    return redirect('counselor_leave')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({"success": False, "message": "An error occurred"}, status=500)
+        messages.error(request, "An error occurred while processing your request.")
+        return redirect('counselor_leave')
 
 @login_required
 def filter_leaves(request):
@@ -633,6 +724,162 @@ def counselor_weekly_reports(request):
     }
     return render(request, 'counselor_weekly_reports.html', context)
 
+@login_required
+def student_insights(request):
+    # Get the counselor object for the current user
+    counselor = get_object_or_404(Counselor, user=request.user)
+
+    # Process remark submission if POST
+    if request.method == "POST":
+        student_roll = request.POST.get("student_id")
+        remark_text = request.POST.get("remarks", "").strip()
+
+        if student_roll and remark_text:
+            try:
+                student = Student.objects.get(roll_number=student_roll)
+
+                # Verify this student is assigned to the current counselor
+                if student.counselor == counselor:
+                    # Create the remark
+                    new_remark = CounselorRemark.objects.create(
+                        counselor=counselor,
+                        student=student,
+                        percentage=student.attendance_percentage,
+                        remarks=remark_text,
+                    )
+
+                    try:
+                        # Send email notification to student
+                        student_email = student.user.email
+
+                        # Determine remark type/tone based on content for appropriate styling
+                        # This is a simple heuristic - could be more sophisticated
+                        low_attendance = student.attendance_percentage < 75
+
+                        # Keywords that might indicate concern
+                        concern_keywords = ['improvement', 'concern', 'attention', 'warning', 'absent', 'attendance',
+                                            'poor']
+                        has_concerns = any(keyword in remark_text.lower() for keyword in concern_keywords)
+
+                        # Set appropriate color based on message tone
+                        if low_attendance or has_concerns:
+                            header_color = '#FFC107'  # Warning yellow
+                        else:
+                            header_color = '#28a745'  # Success green
+
+                        # Format the date
+                        formatted_date = new_remark.date.strftime('%d %B, %Y')
+
+                        # Create HTML email
+                        subject = f"New Counselor Remark from {counselor.user.username}"
+                        html_message = f"""
+                        <html>
+                        <head>
+                            <style>
+                                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                                .header {{ background-color: {header_color}; color: white; padding: 10px 20px; border-radius: 5px 5px 0 0; }}
+                                .content {{ padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
+                                .footer {{ margin-top: 20px; font-size: 12px; color: #777; }}
+                                .remark {{ margin: 15px 0; background-color: #f9f9f9; padding: 15px; border-radius: 5px; white-space: pre-line; }}
+                                .attendance {{ margin-top: 15px; }}
+                                .low-attendance {{ color: #dc3545; font-weight: bold; }}
+                                .good-attendance {{ color: #28a745; font-weight: bold; }}
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <div class="header">
+                                    <h2>New Counselor Remark</h2>
+                                </div>
+                                <div class="content">
+                                    <p>Dear {student.user.username},</p>
+
+                                    <p>Your counselor has provided a new remark regarding your academic progress:</p>
+
+                                    <div class="remark">
+                                        "{remark_text}"
+                                    </div>
+
+                                    <p><strong>Date:</strong> {formatted_date}</p>
+
+                                    <div class="attendance">
+                                        <p><strong>Current Attendance:</strong> 
+                                        <span class="{'low-attendance' if student.attendance_percentage < 75 else 'good-attendance'}">
+                                            {student.attendance_percentage:.2f}%
+                                        </span></p>
+
+                                        {f'<p><strong>Note:</strong> Your attendance is below the required minimum of 75%. Please improve your attendance immediately.</p>' if student.attendance_percentage < 75 else ''}
+                                    </div>
+
+                                    <p>You can view all counselor remarks in your student portal.</p>
+
+                                    <p>Best regards,<br>
+                                    {counselor.user.username}<br>
+                                    Student Counselor</p>
+                                </div>
+                                <div class="footer">
+                                    <p>This is an automated message from the Student Management System.</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>
+                        """
+
+                        from email_utils import send_html_email
+                        send_html_email(
+                            subject=subject,
+                            html_message=html_message,
+                            recipient_list=[student_email],
+                            from_email=settings.DEFAULT_FROM_EMAIL
+                        )
+                    except Exception as email_error:
+                        # Log error but don't prevent remark from being added
+                        print(f"Error sending email notification: {str(email_error)}")
+
+                    messages.success(request, "Remark added successfully!")
+                    return redirect("counselor_insights")
+                else:
+                    # Handle case where student doesn't belong to this counselor
+                    messages.error(request, "You can only add remarks for your assigned students.")
+            except Student.DoesNotExist:
+                messages.error(request, f"Student with roll number {student_roll} not found")
+
+    # GET request: List assigned students and their attendance
+    students = Student.objects.filter(counselor=counselor).select_related("user")
+
+    # Make sure we have students to display
+    if not students.exists():
+        messages.info(request, "No students are currently assigned to you.")
+
+    # For each student, use their attendance_percentage field for display in the template
+    for student in students:
+        # Format attendance percentage for display (round to 2 decimal places)
+        student.latest_attendance = round(student.attendance_percentage, 2)
+        # Debug student information
+        # print(f"Student: {student.roll_number}, User: {student.user.first_name} {student.user.last_name}")
+
+    # Sort students: lower attendance come first
+    students = sorted(students, key=lambda s: s.latest_attendance)
+
+    # Server-side search filtering
+    search_query = request.GET.get("search", "")
+    if search_query:
+        filtered_students = []
+        for student in students:
+            full_name = f"{student.user.first_name} {student.user.last_name}".lower()
+            if (search_query.lower() in full_name or
+                    search_query.lower() in student.roll_number.lower()):
+                filtered_students.append(student)
+        students = filtered_students
+
+    context = {
+        "counselor": counselor,
+        "students": students,
+        "search_query": search_query,
+    }
+    return render(request, "counselor_insights.html", context)
+
 # Add the search_reports view as well
 @login_required
 def search_reports(request):
@@ -680,3 +927,40 @@ def search_reports(request):
         })
 
     return JsonResponse({'reports': reports_data})
+
+@login_required
+def download_attendance(request):
+    counselor = request.user.counselor
+    students = Student.objects.filter(counselor=counselor).select_related("user")
+
+    if not students.exists():
+        messages.info(request, "No students assigned to you.")
+        return redirect("counselor_insights")
+
+    # Prepare data for the Excel file
+    data = []
+    for student in students:
+        # first_name = student.user.first_name if student.user and student.user.first_name else ""
+        # last_name = student.user.last_name if student.user and student.user.last_name else ""
+        full_name = student.user.username if student.user and student.user.username else ""
+        # full_name = f"{first_name} {last_name}".strip()
+
+        data.append([
+            student.roll_number,
+            full_name,  # Ensure it's never None
+            round(student.attendance_percentage, 2),
+        ])
+
+    # Create a Pandas DataFrame
+    df = pd.DataFrame(data, columns=["Roll Number", "Student Name", "Attendance (%)"])
+
+    # Save DataFrame to an Excel file in memory
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        df.to_excel(writer, sheet_name="Attendance", index=False)
+        writer.close()
+
+    # Set response headers for file download
+    response = HttpResponse(output.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="Student_Attendance.xlsx"'
+    return response

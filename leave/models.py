@@ -2,7 +2,6 @@ from django.db import models
 from django.utils import timezone
 from authentication.models import Student, Counselor
 
-
 class StudentLeave(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     date = models.DateField()

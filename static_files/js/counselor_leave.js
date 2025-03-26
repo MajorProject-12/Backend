@@ -1,6 +1,6 @@
 // Wait for the DOM to load
 document.addEventListener("DOMContentLoaded", function () {
-  // Get references to the buttons and containers for toggling between "New" and "Records"
+  // Get references to the buttons and containers
   const newButton = document.querySelector(".new");
   const recordsButton = document.querySelector(".records");
   const container1 = document.querySelector(".container-1");
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Make sure the dropdown selects take the proper values (useful when filtering)
+  // Set dropdown values from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('month')) {
     const monthValue = urlParams.get('month');
@@ -82,10 +82,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Add animation to status changes
+  // Handle action links (approve/reject) with improved error handling
   const actionLinks = document.querySelectorAll('.action-link');
   actionLinks.forEach(link => {
     link.addEventListener('click', function(e) {
+      e.preventDefault();
+
       // Find the parent row
       const row = this.closest('tr');
 
@@ -93,13 +95,122 @@ document.addEventListener("DOMContentLoaded", function () {
       row.style.transition = 'background-color 0.5s';
       row.style.backgroundColor = '#ffffcc';
 
-      // Optional: Add a slight delay before redirecting
-      // e.preventDefault();
-      // setTimeout(() => {
-      //   window.location.href = this.href;
-      // }, 300);
+      // Get leave ID and status from the URL
+      const url = this.getAttribute('href');
+      const leaveId = new URL(url, window.location.origin).searchParams.get('leave_id');
+      const status = new URL(url, window.location.origin).searchParams.get('status');
+
+      // Add CSRF token to headers if Django is expecting it
+      const csrfToken = getCookie('csrftoken');
+
+      // Use Fetch API instead of XMLHttpRequest
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': csrfToken
+        }
+      })
+      .then(response => {
+        // First check if the response is JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          return response.json().then(data => {
+            if (!response.ok) {
+              throw new Error(data.message || 'Server error');
+            }
+            return data;
+          });
+        } else {
+          // If not JSON, it might be a redirect or HTML
+          if (response.ok) {
+            // Just reload the page to follow any redirects
+            window.location.reload();
+            return null;
+          } else {
+            throw new Error('Server returned an error');
+          }
+        }
+      })
+      .then(data => {
+        if (data) {
+          // Update UI if we got JSON data back
+          updateUI(row, status);
+        }
+      })
+      .catch(error => {
+        // Display error message
+        console.error('Error:', error);
+        alert('Error: ' + error.message);
+
+        // Reset row highlighting
+        row.style.backgroundColor = '';
+      });
     });
   });
+
+  // Helper function to get cookies (for CSRF token)
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Function to update UI after successful action
+  function updateUI(row, status) {
+    // Update the status in the current row
+    const statusCell = row.querySelector('.status');
+    if (statusCell) {
+      statusCell.textContent = status;
+      statusCell.className = 'status ' + status.toLowerCase();
+
+      // Update status color
+      if (status === 'Approved') {
+        statusCell.style.backgroundColor = '#28a745';
+      } else {
+        statusCell.style.backgroundColor = '#dc3545';
+      }
+    }
+
+    // Remove operation buttons
+    const operationsCell = row.querySelector('.operations');
+    if (operationsCell) {
+      operationsCell.innerHTML = '';
+    }
+
+    // After a delay, move the row to the processed table
+    setTimeout(() => {
+      const processedTable = container2.querySelector('tbody');
+
+      // Remove the row from pending table
+      row.remove();
+
+      // Check if pending table is now empty
+      const pendingRows = container1.querySelectorAll('tbody tr');
+      if (pendingRows.length === 0 || (pendingRows.length === 1 && pendingRows[0].querySelector('td[colspan]'))) {
+        // No rows left, add a "no pending applications" row
+        const pendingTbody = container1.querySelector('tbody');
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = '<td colspan="8" class="text-center">No pending leave applications.</td>';
+        pendingTbody.appendChild(emptyRow);
+      }
+
+      // Switch to Records tab
+      recordsButton.click();
+
+      // Reload page to get updated records
+      window.location.reload();
+    }, 1000);
+  }
 
   // Set status colors for all status elements
   setStatusColors();
@@ -128,13 +239,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Auto-submit form when month/year selection changes
   const monthSelect = document.getElementById('monthSelect');
-  const yearSelect = document.getElementById('yearSelect');
-  if (monthSelect && yearSelect) {
+  const yearSelectForChange = document.getElementById('yearSelect');
+  if (monthSelect && yearSelectForChange) {
     monthSelect.addEventListener('change', function() {
       document.getElementById('searchForm').submit();
     });
 
-    yearSelect.addEventListener('change', function() {
+    yearSelectForChange.addEventListener('change', function() {
       document.getElementById('searchForm').submit();
     });
   }

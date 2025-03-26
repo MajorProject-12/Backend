@@ -1,19 +1,112 @@
-<!--student_dashboard.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>student Dashboard</title>
     {% load static %}
-    <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
+    <title>DocRAG</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
-    <link rel="stylesheet" href="{% static 'css/student_dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/student_qabot.css' %}">
     <script src="{% static 'js/header.js' %}"></script>
-    
+    <style>
+        body {
+    background-color: #F8F9FC;
+    font-family: Outfit, sans-serif;
+    background: url("images/Background2.svg") no-repeat top center;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-color: #000;
+    min-height: 100vh;
+    font-family: sans-serif;
+}
+
+#nav-item6 {
+    background-color: #8d939d;
+    border-radius: 10px;
+    border: 10px;
+}
+
+
+.content{
+    margin: 35px ;
+    border: none;
+    border-radius: 1.5rem;
+    /* box-shadow: 0px 0px 40px 0px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    background: rgba(248, 249, 252, 0.825);
+     */
+}
+
+.content-wrapper{
+    display: flex;
+    flex-direction: column;
+}
+
+.page-title{
+    font-size: 40px;
+    text-align: left;
+    font-family: Outfit, sans-serif;
+}
+
+.title-wrapper {
+ margin-left: 50px;
+ width: fit-content;
+ float: left;
+}
+
+.illustration{
+    height: 25rem;
+}
+
+.section-empty{
+    display: block;
+    align-self: center;
+    text-align: center;
+    font-size: 25px;
+    font-family: Outfit, sans-serif;
+    margin-top: -100px;
+}
+
+.section-empty-text{
+    margin-top: 1%;
+    margin-bottom: 2%;
+}
+
+
+
+@media (max-width: 600px) {
+
+body {
+overflow-x: hidden;
+}
+
+.content{
+    margin: 10px;
+}
+
+.content-wrapper{
+    gap: 50px;
+}
+
+.illustration{
+    height: 17rem;
+}
+
+.section-empty{
+    margin-top: -20px;
+}
+
+.section-empty-text{
+    margin-bottom: 10%;
+}
+
+}
+    </style>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
     <header>
@@ -28,7 +121,7 @@
                 <a href="{% url 'student_remarks' %}" class="nav-item" id="nav-item3">Remarks</a>
                 <a href="{% url 'student_leave' %}" class="nav-item" id="nav-item4">Leave Application</a>
                 <a href="{% url 'student_weekly_reports' %}" class="nav-item" id="nav-item5">Weekly Report</a>
-                <a href="{% url 'student_DocRAG' %}" class="nav-item" id="nav-item6">DocRAG</a>
+                <a href="#" class="nav-item" id="nav-item6">DocRAG</a>
 
             </div>
         </nav>
@@ -59,6 +152,7 @@
             <a class="menu-item" href="#">Statistics</a>
             <a class="menu-item" href="#">Remarks</a>
             <a class="menu-item" href="#">Leave Application</a>
+            <a class="menu-item" href="#">DocRAG</a>
             <hr>
             <a class="menu-item" href="{% url 'profile' %}">Profile</a>
             <a class="menu-item" href="#">Settings</a>
@@ -84,33 +178,16 @@
         </div>
     </div>
     </header>
-    <div class="content-background">
-    <main class="content-wrapper">
-        <div class="content">
 
-            <div class="info">
-                <div class="info-wrapper">
-                    <div class="info-content">
-                        <h1 class="info-title">Welcome, <br>{{ student.user.username }}</h1>
-                        <p>Roll No: {{ student.roll_number }}</p>
-                        <p>Branch: {{ student.branch }}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="details">
-                <div class="details-wrapper">
-                    <div class="details-content">
-                        <h1 class="details-title">Today Attendence Check In:</h1>
-                        <ul>                            
-                            <li>Not Completed</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+    <div class="content">
+        <main class="content-wrapper">
+            <gradio-app src="https://sarath0x8f-docrag.hf.space"></gradio-app>
+        </main>
+    </div>
 
-        </div>
-    </main>
-</div>
 </body>
+<script
+	type="module"
+	src="https://gradio.s3-us-west-2.amazonaws.com/4.44.0/gradio.js"
+></script>
 </html>
