@@ -225,12 +225,11 @@ def student_remarks(request):
     student = get_object_or_404(Student, user=request.user)
     # Get all remarks for this student, ordered by most recent first
     remarks = CounselorRemark.objects.filter(student=student).order_by("-date")
+
     # Debug info
     print(f"Current user ID: {request.user.id}, Username: {request.user.username}")
     print(f"Student: {student.roll_number}")
     print(f"Remarks count: {remarks.count()}")
-    for remark in remarks:
-        print(f"Remark date: {remark.date}, text: {remark.remarks}")
 
     # Message if no remarks
     if not remarks.exists():
@@ -740,32 +739,29 @@ def student_insights(request):
 
                 # Verify this student is assigned to the current counselor
                 if student.counselor == counselor:
-                    # Create the remark
+                    # Analyze sentiment before creating the remark
+                    from .sentiment_utils import analyze_sentiment
+                    sentiment_label, confidence_score = analyze_sentiment(remark_text)
+
+                    # Create the remark with sentiment information
                     new_remark = CounselorRemark.objects.create(
                         counselor=counselor,
                         student=student,
                         percentage=student.attendance_percentage,
                         remarks=remark_text,
+                        sentiment=sentiment_label,
+                        confidence=confidence_score
                     )
 
                     try:
                         # Send email notification to student
                         student_email = student.user.email
 
-                        # Determine remark type/tone based on content for appropriate styling
-                        # This is a simple heuristic - could be more sophisticated
-                        low_attendance = student.attendance_percentage < 75
-
-                        # Keywords that might indicate concern
-                        concern_keywords = ['improvement', 'concern', 'attention', 'warning', 'absent', 'attendance',
-                                            'poor']
-                        has_concerns = any(keyword in remark_text.lower() for keyword in concern_keywords)
-
-                        # Set appropriate color based on message tone
-                        if low_attendance or has_concerns:
-                            header_color = '#FFC107'  # Warning yellow
+                        # Determine header color based on sentiment
+                        if sentiment_label == "NEGATIVE":
+                            header_color = '#dc3545'  # Red for negative
                         else:
-                            header_color = '#28a745'  # Success green
+                            header_color = '#28a745'  # Green for positive
 
                         # Format the date
                         formatted_date = new_remark.date.strftime('%d %B, %Y')
@@ -856,8 +852,6 @@ def student_insights(request):
     for student in students:
         # Format attendance percentage for display (round to 2 decimal places)
         student.latest_attendance = round(student.attendance_percentage, 2)
-        # Debug student information
-        # print(f"Student: {student.roll_number}, User: {student.user.first_name} {student.user.last_name}")
 
     # Sort students: lower attendance come first
     students = sorted(students, key=lambda s: s.latest_attendance)

@@ -11,6 +11,59 @@
     <link rel="stylesheet" href="{% static 'css/student_remarks.css' %}">
     <script src="{% static 'js/header.js' %}"></script>
     <script src="{% static 'js/student_remarks.js' %}"></script>
+    <style>
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .positive-sentiment {
+            color: #28a745; /* Green for positive */
+        }
+
+        .negative-sentiment {
+            color: #dc3545; /* Red for negative */
+        }
+
+        .neutral-sentiment {
+            color: #6c757d; /* Gray for neutral/unknown */
+        }
+    </style>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
     <header>
@@ -21,10 +74,11 @@
             <div class="nav-links">
                 <a href="{% url 'student_dashboard' %}" class="nav-item">Dashboard</a>
                 <a href="{% url 'student_check_in' %}" class="nav-item">Check In</a>
-<!--                <a href="{% url 'student_statistics' %}" class="nav-item">Statistics</a>-->
                 <a href="#" class="nav-item">Remarks</a>
                 <a href="{% url 'student_leave' %}" class="nav-item">Leave Application</a>
                 <a href="{% url 'student_weekly_reports' %}" class="nav-item">Weekly Report</a>
+                <a href="{% url 'student_DocRAG' %}" class="nav-item" id="nav-item6">DocRAG</a>
+
             </div>
         </nav>
         <div class="profile-container" id="profile-container">
@@ -47,6 +101,10 @@
         <main class="content-wrapper">
             <div class="title-wrapper">
                 <h1 class="page-title">Remarks</h1>
+                <div class="tooltip">
+                        <img src="{% static 'images/icons/info.svg' %}" alt="info" height="20px">
+                        <span class="tooltiptext">Green are positive remarks and Red are negative remarks</span>
+                </div>
             </div>
             <div class="section-remarks">
                 <table>
@@ -62,7 +120,19 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ remark.date }}</td>
-                            <td>{{ remark.remarks }}</td>
+                            <td class="tooltip">
+                                {% if remark.sentiment == "POSITIVE" %}
+                                    <span class="positive-sentiment">{{ remark.remarks }}</span>
+                                {% elif remark.sentiment == "NEGATIVE" %}
+                                    <span class="negative-sentiment">{{ remark.remarks }}</span>
+                                {% else %}
+                                    <span class="neutral-sentiment">{{ remark.remarks }}</span>
+                                {% endif %}
+                                <span class="tooltiptext">
+                                    Sentiment: {{ remark.sentiment|default:"Unknown" }}<br>
+                                    Confidence: {{ remark.confidence|floatformat:2 }}
+                                </span>
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -78,12 +148,5 @@
             </div>
         </main>
     </div>
-<!--    &lt;!&ndash; Add this right below <div class="content"> &ndash;&gt;-->
-<!--    <div style="background-color: yellow; padding: 10px;">-->
-<!--        DEBUG: Found {{ remarks.count }} remarks.-->
-<!--        {% for r in remarks %}-->
-<!--            <p>{{ r.date }}: {{ r.remarks }}</p>-->
-<!--        {% endfor %}-->
-<!--    </div>-->
 </body>
 </html>

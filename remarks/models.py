@@ -17,5 +17,9 @@ class CounselorRemark(models.Model):
     percentage = models.FloatField()
     remarks = models.TextField()
 
+    # New fields for sentiment analysis
+    sentiment = models.CharField(max_length=20, blank=True, null=True)  # POSITIVE or NEGATIVE
+    confidence = models.FloatField(default=0.0)  # Confidence score
+
     def __str__(self):
         return f"Remark by {self.counselor.user.email} for {self.student.roll_number} on {self.date}"
