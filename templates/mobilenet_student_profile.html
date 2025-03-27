@@ -1,0 +1,705 @@
+<!--templates/mobilenet_student_profile.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MobileNet Face Registration</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/student_profile.css' %}">
+    <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'js/student_profile.js' %}"></script>
+</head>
+<body style="background-image: url({% static 'images/Background2.svg' %})">
+    <style>
+    /* Styling for disabled scan button */
+    .scan-button.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Popup styling */
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .popup-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .popup-content {
+        background-color: white;
+        padding: 25px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        transform: translateY(-20px);
+        transition: transform 0.3s;
+    }
+
+    .popup-overlay.active .popup-content {
+        transform: translateY(0);
+    }
+
+    .popup-title {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .popup-message {
+        margin: 20px 0;
+        line-height: 1.5;
+    }
+
+    .popup-button {
+        background-color: #4682B4;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+    .popup-button:hover {
+        background-color: #3b6e96;
+    }
+
+    /* MobileNet badge styling */
+    .mobilenet-badge {
+        background-color: #4682B4;
+        color: white;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin-left: 10px;
+    }
+
+    /* Message styling */
+    .alert-message {
+        padding: 10px 15px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        color: #333;
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    .alert-message.success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    .alert-message.error {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    .alert-message.warning {
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+        color: #856404;
+    }
+</style>
+    <header>
+        <div class="logo-container">
+            <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
+        </div>
+        <nav class="nav-content">
+            <div class="nav-links">
+                <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
+                <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
+<!--                <a href="{% url 'student_statistics' %}" class="nav-item" id="nav-item2">Statistics</a>-->
+                <a href="{% url 'student_remarks' %}" class="nav-item" id="nav-item3">Remarks</a>
+                <a href="{% url 'student_leave' %}" class="nav-item" id="nav-item4">Leave Application</a>
+                <a href="{% url 'student_weekly_reports' %}" class="nav-item" id="nav-item5">Weekly Report</a>
+                <a href="{% url 'student_DocRAG' %}" class="nav-item" id="nav-item6">DocRAG</a>
+            </div>
+        </nav>
+
+        <div class="right-container">
+            <div class="notifications" id="notifications">
+                <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
+            </div>
+            <div class="burger-menu" id="burger-menu">
+                <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="notification-dropdown-menu">
+            <h2>Notifications</h2>
+            <a class="menu-item" href="#">Notification 1</a>
+            <a class="menu-item" href="#">Notification 2</a>
+            <a class="menu-item" href="#">Notification 3</a>
+            <div class="footer">
+                <span>View All</span>
+            </div>
+        </div>
+
+        <div class="burger-dropdown" id="burger-dropdown">
+            <h2>Menu</h2>
+            <a class="menu-item" href="#">Dashboard</a>
+            <a class="menu-item" href="#">Check In</a>
+            <a class="menu-item" href="#">Statistics</a>
+            <a class="menu-item" href="#">Remarks</a>
+            <a class="menu-item" href="#">Leave Application</a>
+            <hr>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <a href="#" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+            </div>
+        </div>
+
+        <div class="profile-container" id="profile-container">
+        <div class="profile" id="profile">
+            <img alt="User  profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+            <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu">
+            <h2>Hello <br> {{ student.user.username }}!</h2>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <a href="#" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+            </div>
+        </div>
+    </div>
+    </header>
+    <div class="content-background">
+    <main class="content-wrapper">
+        <div class="content">
+            <div class="info">
+                <div class="info-wrapper">
+                    <div class="info-content-1">
+                        <div class="title-button-container">
+                            <h1 class="page-title">MobileNet <br>Face Registration</h1>
+                            <span class="mobilenet-badge">Enhanced Security</span>
+                        </div>
+                        <div class="list-container">
+                            <ul>
+                                <li><b>Name:</b> {{ student.user.username }}</li>
+                                <li><b>Roll number:</b> {{ student.roll_number }}</li>
+                                <li><b>Branch:</b> {{ student.branch }}</li>
+                                <li><b>Year:</b> {{ student.year }}</li>
+                                <li><b>Semester:</b> {{ student.semester }}</li>
+                                <li><b>Mail:</b> {{ student.user.email }}</li>
+                                <li><b>Gender:</b> {{ student.gender }}</li>
+                            </ul>
+                        </div>
+                        <hr>
+                        <div class="face-recognition-section">
+                            <span><b>MobileNet Face Recognition:</b> <span id="recognition-status">Checking...</span></span>
+                            <button class="scan-button" id="scan-button"><b>Register Face</b><img class="scan-icon" src="{% static 'images/icons/scan-user.svg' %}" alt="scan"></button>
+                        </div>
+                    </div>
+
+                    <div class="info-content-2">
+                        <div class="title-button-container">
+                            <img src="{% static 'images/icons/arrow-left.svg' %}" alt="back" class="back-icon">
+                            <h1 class="page-title">Academic <br>Details</h1>
+                            <button class="save-button" id="save-button"><b>Save</b><img class="edit-icon" src="{% static 'images/icons/Pen.svg' %}" alt="Pen"></button>
+                        </div>
+                        <div class="form-container">
+                            <form id="editProfileForm"
+                                  method="POST"
+                                  action="{% url 'update_profile' %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label><b>Name:</b></label>
+                                    <input type="text"
+                                           name="username"
+                                           value="{{ student.user.username }}"
+                                           class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Roll number:</b></label>
+                                    <input type="text"
+                                           name="roll_number"
+                                           value="{{ student.roll_number }}"
+                                           readonly
+                                           class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Branch:</b></label>
+                                    <select name="branch" class="form-control">
+                                        {% for code, name in student.BRANCH_CHOICES %}
+                                            <option value="{{ code }}"
+                                                    {% if student.branch == code %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Year:</b></label>
+                                    <select name="year" class="form-control">
+                                        {% for code, name in student.YEAR_CHOICES %}
+                                            <option value="{{ code }}"
+                                                    {% if student.year == code %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Semester:</b></label>
+                                    <select name="semester" class="form-control">
+                                        {% for code, name in student.SEMESTER_CHOICES %}
+                                            <option value="{{ code }}"
+                                                    {% if student.semester == code %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Mail:</b></label>
+                                    <input type="email"
+                                           name="email"
+                                           value="{{ student.user.email }}"
+                                           class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><b>Gender:</b></label>
+                                    <select name="gender" class="form-control">
+                                        {% for code, name in student.GENDER_CHOICES %}
+                                            <option value="{{ code }}"
+                                                    {% if student.gender == code %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <hr>
+                    </div>
+
+                    <div class="info-content-3" style="display: none;">
+                        <div class="title-button-container">
+                            <h1 class="page-title">MobileNet <br>Face Scanner</h1>
+                            <button class="close-button"><b>Close</b><img class="edit-icon" src="{% static 'images/icons/button-close.svg' %}" alt="close"></button>
+                        </div>
+                        <div class="scanner-container">
+                            <div class="scanner">
+                                <div class="scanner-wrapper">
+                                    <div class="face-scanner">
+                                        <div class="scanner-view">
+                                            <video id="webcam" autoplay style="display: none;" width="100%" height="100%"></video>
+                                            <img loading="lazy" src="{% static 'images/icons/face-scan-white.svg' %}" class="scanner-icon" alt="Face Scanner Interface" />
+                                        </div>
+                                        <div id="message" class="alert-message d-none"></div>
+                                        <button class="scan-button-main" id="capture-button">
+                                            <span>Scan</span>
+                                            <img loading="lazy" src="{% static 'images/icons/photo-capture.svg' %}" class="scan-icon-main" alt="" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+            <div class="img-wrapper">
+                <img src="{% static 'images/illustrations/profile-illustration.svg' %}" alt="illustration">
+            </div>
+        </div>
+    </main>
+</div>
+<div class="popup-overlay" id="reregister-popup">
+    <div class="popup-content">
+        <h3 class="popup-title">Face Already Registered</h3>
+        <p class="popup-message">Your face is already registered in the MobileNet system. If you need to re-register, please contact an administrator to reset your face recognition data.</p>
+        <button class="popup-button" id="close-popup">OK</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const video = document.getElementById('webcam');
+    const captureButton = document.getElementById('capture-button');
+    const messageDiv = document.getElementById('message');
+    const recognitionStatus = document.getElementById('recognition-status');
+    const scanButton = document.getElementById('scan-button');
+    const scannerIcon = document.querySelector('.scanner-icon');
+    const popup = document.getElementById('reregister-popup');
+    const closePopupButton = document.getElementById('close-popup');
+    const infoContent1 = document.querySelector('.info-content-1');
+    const infoContent3 = document.querySelector('.info-content-3');
+    const closeButton = document.querySelector('.close-button');
+
+    // Check if face is registered on page load and update UI accordingly
+    checkRegistrationStatus(true);
+
+    // Close popup when the OK button is clicked
+    closePopupButton.addEventListener('click', function() {
+        popup.classList.remove('active');
+    });
+
+    // Event listener for the scan button
+    scanButton.addEventListener('click', function(e) {
+        // If button is disabled, show popup instead
+        if (scanButton.classList.contains('disabled')) {
+            e.preventDefault();
+            popup.classList.add('active');
+            return;
+        }
+
+        // Otherwise proceed to face scanner
+        fadeOut(infoContent1, function () {
+            infoContent1.style.display = 'none';
+            infoContent3.style.display = 'block';
+            fadeIn(infoContent3);
+        });
+    });
+
+    // Event listener for the close button
+    closeButton.addEventListener('click', function() {
+        fadeOut(infoContent3, function () {
+            infoContent3.style.display = 'none';
+            infoContent1.style.display = 'block';
+            fadeIn(infoContent1);
+            stopWebcam();
+        });
+    });
+
+    // Add fade transitions
+    const editButton = document.querySelector('.edit-button');
+    const backIcon = document.querySelector('.back-icon');
+    const infoContent2 = document.querySelector('.info-content-2');
+    const saveButton = document.getElementById('save-button');
+    const editProfileForm = document.getElementById('editProfileForm');
+
+    // Add event listener to the Edit button if it exists
+    if (editButton) {
+        editButton.addEventListener('click', () => {
+            fadeOut(infoContent1, function () {
+                infoContent1.style.display = 'none'; // Hide info-content-1
+                infoContent2.style.display = 'block'; // Show info-content-2
+                fadeIn(infoContent2); // Fade in info-content-2
+            });
+        });
+    }
+
+    // Add event listener to the Back icon
+    backIcon.addEventListener('click', () => {
+        fadeOut(infoContent2, function () {
+            infoContent2.style.display = 'none'; // Hide info-content-2
+            infoContent1.style.display = 'block'; // Show info-content-1
+            fadeIn(infoContent1); // Fade in info-content-1
+            editProfileForm.reset(); // Reset the form fields
+        });
+    });
+
+    // Add event listener to the Save button
+    saveButton.addEventListener('click', function() {
+        editProfileForm.submit(); // Save changes
+    });
+
+    // Event listener for capture button
+    captureButton.addEventListener('click', () => {
+        startWebcam();
+        displayMessage('Position your face in the frame. Capturing in 5 seconds...', 'warning');
+
+        // Wait longer to ensure webcam is initialized
+        setTimeout(() => {
+            displayMessage('Capturing image now...', 'warning');
+            const imageData = captureImage();
+            if (imageData) {
+                registerFace(imageData);
+            } else {
+                displayMessage('Failed to capture image. Please try again.', 'error');
+                stopWebcam();
+            }
+        }, 5000);
+    });
+
+    // Function to fade out an element
+    function fadeOut(element, callback) {
+        let opacity = 1;
+        const interval = setInterval(function () {
+            if (opacity > 0) {
+                opacity -= 0.3;
+                element.style.opacity = opacity;
+            } else {
+                clearInterval(interval);
+                if (callback) callback();
+            }
+        }, 50);
+    }
+
+    // Function to fade in an element
+    function fadeIn(element) {
+        let opacity = 0;
+        element.style.opacity = opacity;
+        element.style.display = 'block'; // Ensure the element is visible
+        const interval = setInterval(function () {
+            if (opacity < 1) {
+                opacity += 0.3;
+                element.style.opacity = opacity;
+            } else {
+                clearInterval(interval);
+            }
+        }, 50);
+    }
+
+    // Function to check registration status with MobileNet
+    function checkRegistrationStatus(updateUI = false) {
+        console.log("Checking MobileNet registration status...");
+        if (!updateUI) {
+            displayMessage("Checking registration status...", 'warning');
+        }
+
+        fetch('/mobilenet/check_registration/')
+            .then(response => {
+                console.log("Registration status response:", response.status);
+                if (!response.ok) {
+                    throw new Error('Server returned ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("MobileNet registration status data:", data);
+                if (data.is_registered) {
+                    recognitionStatus.textContent = 'Registered';
+                    recognitionStatus.style.color = '#28a745';
+
+                    // Disable scan button when face is registered
+                    if (updateUI) {
+                        scanButton.classList.add('disabled');
+                        scanButton.innerHTML = '<b>Already Registered</b><img class="scan-icon" src="{% static "images/icons/scan-user.svg" %}" alt="scan">';
+                    } else {
+                        displayMessage("Face is already registered in MobileNet system.", 'success');
+                    }
+                } else {
+                    recognitionStatus.textContent = 'Not Registered';
+                    recognitionStatus.style.color = '#dc3545';
+
+                    // Enable scan button when face is not registered
+                    if (updateUI) {
+                        scanButton.classList.remove('disabled');
+                    } else {
+                        displayMessage("Face not registered in MobileNet system. Please scan your face.", 'warning');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking MobileNet registration status:', error);
+                recognitionStatus.textContent = 'Unknown';
+                recognitionStatus.style.color = '#6c757d';
+                if (!updateUI) {
+                    displayMessage('Unable to check MobileNet registration status. ' + error.message, 'error');
+                }
+            });
+    }
+
+    // Function to start the webcam with error handling
+    function startWebcam() {
+        console.log("Starting webcam...");
+        displayMessage("Starting camera...", 'warning');
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.error("Media devices API not supported");
+            displayMessage('Your browser does not support camera access.', 'error');
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                width: { ideal: 640 },
+                height: { ideal: 480 },
+                facingMode: "user"
+            }
+        })
+        .then((stream) => {
+            console.log("Webcam started successfully");
+            video.srcObject = stream;
+            video.style.display = 'block';
+            scannerIcon.style.display = 'none';
+
+            // Make sure video is ready before capturing
+            video.onloadedmetadata = function() {
+                console.log("Video metadata loaded, video dimensions:", video.videoWidth, "x", video.videoHeight);
+            };
+        })
+        .catch((error) => {
+            console.error("Error accessing webcam: ", error);
+            displayMessage('Unable to access webcam: ' + error.message, 'error');
+        });
+    }
+
+    // Function to safely stop the webcam
+    function stopWebcam() {
+        console.log("Stopping webcam...");
+        if (video.srcObject) {
+            const tracks = video.srcObject.getTracks();
+            tracks.forEach(track => {
+                track.stop();
+                console.log("Track stopped:", track.kind);
+            });
+            video.srcObject = null;
+            video.style.display = 'none';
+            scannerIcon.style.display = 'block';
+        }
+    }
+
+    // Improved capture image function
+    function captureImage() {
+        console.log("Capturing image...");
+        try {
+            if (!video.videoWidth) {
+                console.error("Video not ready yet");
+                displayMessage("Camera not ready. Please wait a moment.", 'error');
+                return null;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            console.log("Canvas dimensions:", canvas.width, "x", canvas.height);
+
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL('image/jpeg', 0.9);
+            console.log("Image captured, data length:", imageData.length);
+
+            return imageData;
+        } catch (error) {
+            console.error("Error capturing image:", error);
+            displayMessage("Error capturing image: " + error.message, 'error');
+            return null;
+        }
+    }
+
+    // Register face using MobileNet system
+    function registerFace(imageData) {
+        if (!imageData) {
+            displayMessage("No image captured. Please try again.", 'error');
+            return;
+        }
+
+        console.log("Registering face with MobileNet...");
+        displayMessage('Processing... Please wait', 'warning');
+
+        fetch('/mobilenet/register_face/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ image: imageData })
+        })
+        .then(response => {
+            console.log("MobileNet registration response status:", response.status);
+            if (!response.ok) {
+                throw new Error('Server returned ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("MobileNet registration response:", data);
+            displayMessage(data.message || 'Face registration completed', data.success ? 'success' : 'error');
+
+            // Check for success condition
+            if (data.success === true) {
+                recognitionStatus.textContent = 'Registered';
+                recognitionStatus.style.color = '#28a745';
+
+                // Disable the scan button after successful registration
+                scanButton.classList.add('disabled');
+                scanButton.innerHTML = '<b>Already Registered</b><img class="scan-icon" src="{% static "images/icons/scan-user.svg" %}" alt="scan">';
+            }
+
+            // Stop the webcam after registration
+            setTimeout(() => {
+                stopWebcam();
+
+                // Go back to profile view after a delay
+                setTimeout(() => {
+                    fadeOut(infoContent3, function () {
+                        infoContent3.style.display = 'none';
+                        infoContent1.style.display = 'block';
+                        fadeIn(infoContent1);
+                    });
+                }, 3000);
+            }, 1000);
+        })
+        .catch(error => {
+            console.error('Error during MobileNet face registration:', error);
+            displayMessage('An error occurred during registration: ' + error.message, 'error');
+            setTimeout(() => {
+                stopWebcam();
+            }, 1000);
+        });
+    }
+
+    // Improved displayMessage function
+    function displayMessage(message, type = '') {
+        console.log(`Message (${type}):`, message);
+        if (messageDiv) {
+            messageDiv.textContent = message;
+            messageDiv.classList.remove('d-none', 'success', 'error', 'warning');
+
+            if (type) {
+                messageDiv.classList.add(type);
+            }
+
+            messageDiv.classList.remove('d-none');
+
+            // Auto-hide success messages after some time
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.classList.add('d-none');
+                }, 5000);
+            }
+        }
+    }
+
+    // Utility function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+</body>
+</html>

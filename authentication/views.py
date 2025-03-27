@@ -69,7 +69,7 @@ def student_check_in(request):
     context = {
         'student': student,
     }
-    return render(request, 'student_check_in.html', context)
+    return render(request, 'mobilenet_student_profile.html', context)
 
 @login_required
 def student_dashboard(request):
@@ -958,3 +958,6 @@ def download_attendance(request):
     response = HttpResponse(output.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = 'attachment; filename="Student_Attendance.xlsx"'
     return response
+
+# def counselor_attendance(request):
+

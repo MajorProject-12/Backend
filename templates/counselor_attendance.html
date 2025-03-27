@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Status</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="counselor_attendance.css">
+    <script src="header.js"></script>
+    <script src="counselor_attendance.js"></script>
+
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img id="logo" src="images/Logo.svg" alt="Logo" height="50px">
+        </div>
+        <nav class="nav-content">
+            <div class="nav-links">
+                <a href="counselor_dashboard.html" class="nav-item" id="nav-item0">Dashboard</a>
+                <!-- <a href="#" class="nav-item" id="nav-item1">Manage Students</a> -->
+                <a href="counselor_attendance.html" class="nav-item" id="nav-item4">Attendance Status</a>
+                <a href="counselor_insights.html" class="nav-item" id="nav-item1">Student Insights</a>
+                <a href="counselor_leave.html" class="nav-item" id="nav-item2">Leave Applications</a>
+                <a href="counselor_weekly_reports.html" class="nav-item" id="nav-item3">Weekly Reports</a>
+                <a href="counselor_chatbot.html" class="nav-item" id="nav-item5">InfoMate</a>
+
+
+            </div>
+        </nav>
+
+        <div class="right-container">
+            <div class="notifications" id="notifications">
+                <img alt="Notifications icon" height="25px" src="images/icons/Notifications.svg" />
+            </div>
+            <div class="burger-menu" id="burger-menu">
+                <img src="images/icons/burger-menu.svg" alt="burger-menu-icon">
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="notification-dropdown-menu">
+            <h2>Notifications</h2>
+            <a class="menu-item" href="#">Notification 1</a>
+            <a class="menu-item" href="#">Notification 2</a>
+            <a class="menu-item" href="#">Notification 3</a>
+            <div class="footer">
+                <span>View All</span>
+            </div>
+        </div>
+
+        <div class="burger-dropdown" id="burger-dropdown">
+            <h2>Menu</h2>
+            <a class="menu-item" href="counselor_dashboard.html">Dashboard</a>
+            <!-- <a class="menu-item" href="#">Manage Students</a> -->
+            <a class="menu-item" href="counselor_insights.html">Student Insights</a>
+            <a class="menu-item" href="counselor_attendance.html">Absentees</a>
+            <a class="menu-item" href="counselor_leave.html">Leave Applications</a>
+            <a class="menu-item" href="counselor_weekly_reports.html">Weekly Reports</a>
+            <a class="menu-item" href="counselor_chatbot.html">InfoMate</a>
+            
+            <hr>
+            <a class="menu-item" href="counselor_profile.html">Profile</a>
+            <a class="menu-item" href="counselor_settings.html">Settings</a>
+            <div class="footer">
+                <a href="counselor_faqs.html" id="faqs"><span>FAQs</span></a>
+                <a href="#" id="sign_out">Sign out</a>
+            </div>
+        </div>
+
+        <div class="profile-container" id="profile-container">
+            <div class="profile" id="profile">
+                <img alt="User    profile picture" height="45px" src="images/icons/profile.svg" />
+                <img src="images/icons/Arrow.svg" alt="arrow" id="dropdown-icon">
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu">
+                <h2>Hello Arjun!</h2>
+                <a class="menu-item" href="counselor_profile.html">Profile</a>
+                <a class="menu-item" href="counselor_settings.html">Settings</a>
+                <div class="footer">
+                    <a href="counselor_faqs.html" id="faqs"><span>FAQs</span></a>
+                    <a href="#" id="sign_out">Sign out</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="content">
+
+        <main class="content-wrapper">
+            <div class="sidebar">
+                <h2>Attendance Status <br> (Today's)</h2>
+            </div>
+
+            <div class="top-controls">
+                <div class="search-container">
+                    <input type="text" placeholder="search by name or roll no">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="card">
+                    <p>Total Present</p>
+                    <div>
+                        <span class="highlight"></span>
+                    </div>
+                </div>
+                <div class="card">
+                    <p>Total Absent</p>
+                    <div>
+                        <span class="highlight"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-1">
+
+                <div class="info">
+                    <h1>Assigned Students</h1>
+                </div>                
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Branch</th>
+                            <th>Section</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                        <tbody>
+                          <tr>
+                            <td>1</td>
+                            <td>21bq1a4201</td>
+                            <td>Rohit</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Present</span></td>
+                          </tr>
+                          <tr>
+                            <td>2</td>
+                            <td>21bq1a4227</td>
+                            <td>Naveen</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Absent</span></td>
+                          </tr>
+                          <tr>
+                            <td>3</td>
+                            <td>21bq1a4211</td>
+                            <td>Praveen</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Present</span></td>
+                          </tr>
+                          <tr>
+                            <td>4</td>
+                            <td>21bq1a4205</td>
+                            <td>Manoj</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Absent</span></td>
+                          </tr>
+                          <tr>
+                            <td>5</td>
+                            <td>21bq1a4213</td>
+                            <td>Rajesh</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Present</span></td>
+                          </tr>
+                          <tr>
+                            <td>6</td>
+                            <td>21bq1a4209</td>
+                            <td>Suresh</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Absent</span></td>
+                          </tr>
+                          <tr>
+                            <td>7</td>
+                            <td>21bq1a4215</td>
+                            <td>Harish</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Present</span></td>
+                          </tr>
+                          <tr>
+                            <td>8</td>
+                            <td>21bq1a4217</td>
+                            <td>Sanjay</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Absent</span></td>
+                          </tr>
+                          <tr>
+                            <td>9</td>
+                            <td>21bq1a4203</td>
+                            <td>Deepak</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Present</span></td>
+                          </tr>
+                          <tr>
+                            <td>10</td>
+                            <td>21bq1a4219</td>
+                            <td>Prakash</td>
+                            <td>csm</td>
+                            <td>A</td>
+                            <td><span class="status">Present</span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+            </div>
+
+        </main>
+    </div>
+</body>
+</html>

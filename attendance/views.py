@@ -13,7 +13,8 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from authentication.models import Student
 from .models import Attendance, FaceRegistration
-from .frs import detect_face, extract_features, recognize_face, process_frame_with_dimensions
+# from .frs import detect_face, extract_features, recognize_face, process_frame_with_dimensions
+from .FasterRCNN_frs import detect_face, extract_features, recognize_face, process_frame_with_dimensions
 
 # Maintain a global dictionary to store streams for each user session
 active_streams = {}
@@ -42,7 +43,6 @@ class VideoCamera:
 
     def stop(self):
         self.is_active = False
-
 
 @login_required
 def check_registration(request):
@@ -309,7 +309,6 @@ def receive_video_frame(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
 @login_required
 @csrf_exempt
 def start_attendance_verification(request):
@@ -414,7 +413,6 @@ def start_attendance_verification(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
 @login_required
 @csrf_exempt
 def stop_video_stream(request):
@@ -427,7 +425,6 @@ def stop_video_stream(request):
         return JsonResponse({'success': True})
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
 
 # This function keeps the original implementation for compatibility
 @login_required
