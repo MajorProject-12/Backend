@@ -9,7 +9,6 @@ class StudentRemark(models.Model):
     def __str__(self):
         return f"Remark for {self.student.roll_number} on {self.date}"
 
-
 class CounselorRemark(models.Model):
     counselor = models.ForeignKey("authentication.Counselor", on_delete=models.CASCADE)  # ✅ Lazy import
     student = models.ForeignKey("authentication.Student", on_delete=models.CASCADE)  # ✅ Lazy import

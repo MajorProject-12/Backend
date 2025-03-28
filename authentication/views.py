@@ -2,6 +2,8 @@
 from django.contrib.auth import authenticate, login, logout
 import random
 import string
+
+from attendance.models import Attendance
 from authentication.models import CustomUser
 from django.conf import settings
 from django.utils.text import capfirst
@@ -959,5 +961,70 @@ def download_attendance(request):
     response["Content-Disposition"] = 'attachment; filename="Student_Attendance.xlsx"'
     return response
 
-# def counselor_attendance(request):
+@login_required
+def counselor_attendance(request):
+    """View for counselors to see today's attendance of their assigned students"""
+    try:
+        # Get the current counselor
+        counselor = get_object_or_404(Counselor, user=request.user)
 
+        # Get all students assigned to this counselor
+        students = Student.objects.filter(counselor=counselor).select_related('user')
+
+        # Get today's date
+        today = timezone.now().date()
+
+        # Initialize attendance data
+        attendance_data = []
+        present_count = 0
+        absent_count = 0
+
+        # For each student, get their attendance status for today
+        for index, student in enumerate(students, 1):
+            # Try to get attendance record for today
+            try:
+                attendance = Attendance.objects.get(student=student, date=today)
+                status = attendance.status
+                if status == 'Present':
+                    present_count += 1
+                else:
+                    absent_count += 1
+            except Attendance.DoesNotExist:
+                # If no record exists, mark as absent by default
+                status = 'Absent'
+                absent_count += 1
+
+            # Add student data to the list
+            attendance_data.append({
+                'sno': index,
+                'roll_number': student.roll_number,
+                'name': student.user.username,
+                'branch': student.get_branch_display(),
+                'section': student.section,
+                'status': status
+            })
+
+        # Search functionality
+        search_query = request.GET.get('search', '')
+        if search_query:
+            filtered_data = []
+            for student in attendance_data:
+                if (search_query.lower() in student['name'].lower() or
+                        search_query.lower() in student['roll_number'].lower()):
+                    filtered_data.append(student)
+            attendance_data = filtered_data
+
+        context = {
+            'counselor': counselor,
+            'attendance_data': attendance_data,
+            'present_count': present_count,
+            'absent_count': absent_count,
+            'search_query': search_query,
+            'today_date': today.strftime('%d %B, %Y')
+        }
+
+        return render(request, 'counselor_attendance.html', context)
+
+    except Exception as e:
+        messages.error(request, f"Error loading attendance data: {str(e)}")
+        return redirect('counselor_dashboard')

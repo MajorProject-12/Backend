@@ -4,41 +4,457 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Status</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="counselor_attendance.css">
-    <script src="header.js"></script>
-    <script src="counselor_attendance.js"></script>
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/counselor_attendance.css' %}">
+    <script src="{% static 'js/header.js' %}"></script>
+    <script src="{% static 'js/counselor_attendance.js' %}"></script>
+    <style>
+        body {
+  background-color: #F8F9FC;
+  font-family: Outfit, sans-serif;
+  background: url("images/Background2.svg") no-repeat top center;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-color: #000;
+  min-height: 100vh;
+  font-family: sans-serif;
+}
 
+#nav-item4 {
+  background-color: #8d939d;
+  border-radius: 10px;
+  border: 10px;
+}
+
+.content {
+  margin: 35px auto;
+  border: none;
+  border-radius: 1.5rem;
+  box-shadow: 0px 0px 40px 0px;
+  padding-top: 35px;
+  padding-bottom: 30px;
+  background: rgba(248, 249, 252, 0.825);
+  width: fit-content;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  height: fit-content;
+  align-self: center;
+}
+
+.card {
+  background-color: #ffffffa8;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: left;
+  width: 100px;
+  height: 80px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+.card p {
+  margin: 0;
+  font-size: 14px;
+  color: grey;
+  position: absolute;
+  top: 10px;
+  left: 20px;
+}
+.card .highlight {
+  font-size: 36px;
+  font-weight: bold;
+  color: black;
+}
+.card .subtext {
+  font-size: 18px;
+  color: grey;
+}
+
+.container-1 {
+  display: block;
+  opacity: 1;
+  background-color: #ffffff9b;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 0 5% 5% 5%;
+}
+
+h1 {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.status {
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #fff;
+  text-align: center;
+  display: inline-block;
+  width: 80%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: calc(100% - 22px);
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  background-color: #ffffff00;
+}
+
+.form-group textarea {
+  height: 100px;
+  resize: none;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.form-actions .submit-btn {
+  background-color: rgb(0, 0, 0);
+  color: #ffffff;
+}
+
+.form-actions .reset-btn {
+  background-color: #8d939db4;
+  color: #ffffff;
+}
+
+.sidebar {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar h2 {
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.sidebar button {
+  padding: 10px 20px;
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background-color: #ffffff75;
+  font-size: 1em;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.sidebar button:hover {
+  background-color: #ffffff;
+}
+
+.button-container {
+  display: flex;
+  gap: 15px;
+}
+
+.container-2 {
+  display: none;
+  opacity: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #ffffff9b;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin: -20% 5% 5% 5%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  margin-right: 1.5rem;
+}
+
+th, td {
+  padding: 12px;
+  text-align: center;
+  line-height: 1.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #fbf8f8;
+}
+
+.remarks-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #fff;
+  text-align: center;
+  width: 80%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: red;
+  cursor: pointer;
+}
+
+/* Search Bar Styles */
+.search-container {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 50px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 5px 20px;
+  width: fit-content;
+  margin: 0px 50px 0px 50px;
+  visibility: visible;
+}
+
+.search-container input {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding: 8px 10px;
+  border-radius: 50px;
+}
+
+.search-container .search-icon {
+  font-size: 20px;
+  color: #000;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.top-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.operations-1, .operations-2{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 25rem;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  top: 150%;
+  left: -915%;
+  margin-left: -60px;
+
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.tooltip .tooltiptext {
+  opacity: 0;
+  transition: opacity 1s ease-in;
+}
+
+.tooltip:hover .tooltiptext {
+  opacity: 1;
+}
+
+.tooltip .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  bottom: 100%;  /* At the top of the tooltip */
+  left: 60.5%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+}
+
+.info{
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.close-btn-container{
+    display: flex;
+    justify-content: center;
+}
+
+.close-btn{
+  margin: 20px 20px 10px 20px;
+  padding: 10px 15px;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  align-self: center;
+  border: none;
+  background-color: #d1d5db;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+h4 {
+  margin: 20px 0px 20px 0px;
+}
+
+h4 span {
+  font-weight: normal;
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .sidebar {
+    margin: 5px 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .button-container {
+    justify-content: center;
+  }
+
+  .container-1, .container-2 {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .form-group input, .form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  table {
+    font-size: 0.8em;
+    width: 100%;
+  }
+
+  .container-1, .container-2 {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  .content {
+    width: 96%;
+    padding: 10px;
+    padding-left: 30px;
+    padding-right: 30px;
+    box-sizing: border-box;
+  }
+
+  .month-year-selector{
+    padding: 10px 0px;
+  }
+}
+
+    </style>
 </head>
-<body>
+<body style="background-image: url({% static 'images/Background2.svg' %})">
+
     <header>
         <div class="logo-container">
-            <img id="logo" src="images/Logo.svg" alt="Logo" height="50px">
+            <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
         </div>
         <nav class="nav-content">
             <div class="nav-links">
-                <a href="counselor_dashboard.html" class="nav-item" id="nav-item0">Dashboard</a>
-                <!-- <a href="#" class="nav-item" id="nav-item1">Manage Students</a> -->
-                <a href="counselor_attendance.html" class="nav-item" id="nav-item4">Attendance Status</a>
-                <a href="counselor_insights.html" class="nav-item" id="nav-item1">Student Insights</a>
-                <a href="counselor_leave.html" class="nav-item" id="nav-item2">Leave Applications</a>
-                <a href="counselor_weekly_reports.html" class="nav-item" id="nav-item3">Weekly Reports</a>
+                <a href="{% url 'counselor_dashboard' %}" class="nav-item" id="nav-item0">Dashboard</a>
+                <a href="{% url 'counselor_attendance' %}" class="nav-item" id="nav-item4">Attendance Status</a>
+                <a href="{% url 'counselor_insights' %}" class="nav-item" id="nav-item1">Student Insights</a>
+                <a href="{% url 'counselor_leave' %}" class="nav-item" id="nav-item2">Leave Applications</a>
+                <a href="{% url 'counselor_weekly_reports' %}" class="nav-item" id="nav-item3">Weekly Reports</a>
                 <a href="counselor_chatbot.html" class="nav-item" id="nav-item5">InfoMate</a>
-
-
             </div>
         </nav>
 
         <div class="right-container">
             <div class="notifications" id="notifications">
-                <img alt="Notifications icon" height="25px" src="images/icons/Notifications.svg" />
+                <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
             </div>
             <div class="burger-menu" id="burger-menu">
-                <img src="images/icons/burger-menu.svg" alt="burger-menu-icon">
+                <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
             </div>
         </div>
 
@@ -54,75 +470,80 @@
 
         <div class="burger-dropdown" id="burger-dropdown">
             <h2>Menu</h2>
-            <a class="menu-item" href="counselor_dashboard.html">Dashboard</a>
-            <!-- <a class="menu-item" href="#">Manage Students</a> -->
-            <a class="menu-item" href="counselor_insights.html">Student Insights</a>
-            <a class="menu-item" href="counselor_attendance.html">Absentees</a>
-            <a class="menu-item" href="counselor_leave.html">Leave Applications</a>
-            <a class="menu-item" href="counselor_weekly_reports.html">Weekly Reports</a>
+            <a class="menu-item" href="{% url 'counselor_dashboard' %}">Dashboard</a>
+            <a class="menu-item" href="{% url 'counselor_insights' %}">Student Insights</a>
+            <a class="menu-item" href="{% url 'counselor_attendance' %}">Attendance Status</a>
+            <a class="menu-item" href="{% url 'counselor_leave' %}">Leave Applications</a>
+            <a class="menu-item" href="{% url 'counselor_weekly_reports' %}">Weekly Reports</a>
             <a class="menu-item" href="counselor_chatbot.html">InfoMate</a>
-            
+
             <hr>
             <a class="menu-item" href="counselor_profile.html">Profile</a>
             <a class="menu-item" href="counselor_settings.html">Settings</a>
             <div class="footer">
                 <a href="counselor_faqs.html" id="faqs"><span>FAQs</span></a>
-                <a href="#" id="sign_out">Sign out</a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
             </div>
         </div>
 
         <div class="profile-container" id="profile-container">
             <div class="profile" id="profile">
-                <img alt="User    profile picture" height="45px" src="images/icons/profile.svg" />
-                <img src="images/icons/Arrow.svg" alt="arrow" id="dropdown-icon">
+                <img alt="User profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+                <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
             </div>
             <div class="dropdown-menu" id="dropdown-menu">
-                <h2>Hello Arjun!</h2>
+                <h2>Hello {{ counselor.user.username }}!</h2>
                 <a class="menu-item" href="counselor_profile.html">Profile</a>
                 <a class="menu-item" href="counselor_settings.html">Settings</a>
                 <div class="footer">
                     <a href="counselor_faqs.html" id="faqs"><span>FAQs</span></a>
-                    <a href="#" id="sign_out">Sign out</a>
+                    <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
                 </div>
             </div>
         </div>
     </header>
 
     <div class="content">
-
         <main class="content-wrapper">
             <div class="sidebar">
                 <h2>Attendance Status <br> (Today's)</h2>
+                <p>{{ today_date }}</p>
             </div>
 
-            <div class="top-controls">
-                <div class="search-container">
-                    <input type="text" placeholder="search by name or roll no">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
-            </div>
+<!--            <div class="top-controls">-->
+<!--                <div class="search-container">-->
+<!--                    <form method="get" action="{% url 'counselor_attendance' %}">-->
+<!--                        <input type="text" name="search" placeholder="search by name or roll no" value="{{ search_query }}">-->
+<!--                        <i class="fas fa-search search-icon"></i>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--            </div>-->
 
             <div class="container">
                 <div class="card">
                     <p>Total Present</p>
                     <div>
-                        <span class="highlight"></span>
+                        <span class="highlight">{{ present_count }}</span>
                     </div>
                 </div>
                 <div class="card">
                     <p>Total Absent</p>
                     <div>
-                        <span class="highlight"></span>
+                        <span class="highlight">{{ absent_count }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="container-1">
-
                 <div class="info">
                     <h1>Assigned Students</h1>
-                </div>                
-                
+                    {% if attendance_data %}
+                    <div>
+                        <a href="{% url 'download_attendance' %}" class="download-btn">Download Attendance</a>
+                    </div>
+                    {% endif %}
+                </div>
+
                 <table>
                     <thead>
                         <tr>
@@ -134,92 +555,72 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                        <tbody>
-                          <tr>
-                            <td>1</td>
-                            <td>21bq1a4201</td>
-                            <td>Rohit</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Present</span></td>
-                          </tr>
-                          <tr>
-                            <td>2</td>
-                            <td>21bq1a4227</td>
-                            <td>Naveen</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Absent</span></td>
-                          </tr>
-                          <tr>
-                            <td>3</td>
-                            <td>21bq1a4211</td>
-                            <td>Praveen</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Present</span></td>
-                          </tr>
-                          <tr>
-                            <td>4</td>
-                            <td>21bq1a4205</td>
-                            <td>Manoj</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Absent</span></td>
-                          </tr>
-                          <tr>
-                            <td>5</td>
-                            <td>21bq1a4213</td>
-                            <td>Rajesh</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Present</span></td>
-                          </tr>
-                          <tr>
-                            <td>6</td>
-                            <td>21bq1a4209</td>
-                            <td>Suresh</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Absent</span></td>
-                          </tr>
-                          <tr>
-                            <td>7</td>
-                            <td>21bq1a4215</td>
-                            <td>Harish</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Present</span></td>
-                          </tr>
-                          <tr>
-                            <td>8</td>
-                            <td>21bq1a4217</td>
-                            <td>Sanjay</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Absent</span></td>
-                          </tr>
-                          <tr>
-                            <td>9</td>
-                            <td>21bq1a4203</td>
-                            <td>Deepak</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Present</span></td>
-                          </tr>
-                          <tr>
-                            <td>10</td>
-                            <td>21bq1a4219</td>
-                            <td>Prakash</td>
-                            <td>csm</td>
-                            <td>A</td>
-                            <td><span class="status">Present</span></td>
-                          </tr>
-                        </tbody>
-                      </table>
+                    <tbody>
+                      {% if attendance_data %}
+                        {% for student in attendance_data %}
+                        <tr>
+                            <td>{{ student.sno }}</td>
+                            <td>{{ student.roll_number }}</td>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.branch }}</td>
+                            <td>{{ student.section }}</td>
+                            <td><span class="status">{{ student.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                      {% else %}
+                        <tr>
+                            <td colspan="6">No students assigned to you yet.</td>
+                        </tr>
+                      {% endif %}
+                    </tbody>
+                </table>
             </div>
-
         </main>
     </div>
+
+    {% if messages %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            {% for message in messages %}
+                alert("{{ message|escapejs }}");
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+
+    <script>
+        // Wait for the DOM to load
+document.addEventListener("DOMContentLoaded", function () {
+    // Function to set status background colors based on text content
+    function setStatusColors() {
+        // Get all elements with the class "status"
+        const statusElements = document.querySelectorAll(".status");
+
+        // Loop through each status element
+        statusElements.forEach(function (element) {
+            const statusText = element.textContent.trim(); // Get the text content of the element
+
+            // Set the background color based on the status text
+            switch (statusText) {
+                case "Present":
+                    element.style.backgroundColor = "#28a745";
+                    element.style.color = "#fff";
+                    break;
+                case "Absent":
+                    element.style.backgroundColor = "#dc3545";
+                    element.style.color = "#fff";
+                    break;
+                default:
+                    // Default background color if the status text doesn't match
+                    element.style.backgroundColor = "#d1d5db";
+                    break;
+            }
+        });
+    }
+
+    // Call the function to set status colors when the page loads
+    setStatusColors();
+});
+    </script>
 </body>
 </html>

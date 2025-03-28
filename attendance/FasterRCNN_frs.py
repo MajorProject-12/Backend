@@ -17,16 +17,29 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 
 # Function to load the FasterRCNN model
-def load_fasterrcnn_model(model_path="checkpoint.pth"):
+def load_fasterrcnn_model(model_path=None):
     """Load the trained FasterRCNN-MobileNet model for face detection"""
     try:
+        # Use path relative to the current script
+        if model_path is None:
+            import os
+            # Get the directory where this script is located
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            model_path = os.path.join(current_dir, "checkpoint.pth")
+
+            # If you're using Django's static files system, you might need:
+            # from django.conf import settings
+            # model_path = os.path.join(settings.STATIC_ROOT, "checkpoint.pth")
+
+        print(f"Loading model from: {model_path}")
+
         # Initialize the model architecture
         model = fasterrcnn_mobilenet_v3_large_fpn(weights=None)
         in_features = model.roi_heads.box_predictor.cls_score.in_features
         model.roi_heads.box_predictor = FastRCNNPredictor(in_channels=in_features, num_classes=2)  # background and face
 
         # Load the trained weights
-        model.load_state_dict(torch.load(model_path, map_location="cpu"))
+        model.load_state_dict(torch.load(model_path, map_location="cpu", weights_only=False))
         model.eval()  # Set to evaluation mode
         print("FasterRCNN-MobileNet model loaded successfully")
         return model
@@ -34,7 +47,6 @@ def load_fasterrcnn_model(model_path="checkpoint.pth"):
         print(f"Error loading FasterRCNN model: {str(e)}")
         print("Falling back to MediaPipe for face detection")
         return None
-
 
 # Initialize the FaceNet embedder
 embedder = FaceNet()
@@ -78,7 +90,6 @@ VALIDATION_WEIGHTS = {
     'texture': 0.05  # Reduced from 0.1 since it's often failing
 }
 
-
 # New function to process frame with dimensions - Updated for both models
 def process_frame_with_dimensions(frame):
     h, w, _ = frame.shape
@@ -93,12 +104,10 @@ def process_frame_with_dimensions(frame):
 
     return results, h, w
 
-
 # Preprocess the image for FaceNet
 def preprocess_image(image):
     img = cv2.resize(image, (160, 160))
     return np.expand_dims(img, axis=0)
-
 
 # Extract features from an image using FaceNet
 def extract_features(img):
@@ -106,7 +115,6 @@ def extract_features(img):
     features = embedder.embeddings(img)
     normalized_features = normalize(features)
     return normalized_features.flatten()
-
 
 # Calculate Eye Aspect Ratio (EAR)
 def calculate_ear(eye_landmarks):
@@ -120,7 +128,6 @@ def calculate_ear(eye_landmarks):
     # Calculate the eye aspect ratio
     ear = (A + B) / (2.0 * C)
     return ear
-
 
 # Detect face and extract face area - Updated to use FasterRCNN with MediaPipe fallback
 def detect_face(frame):
@@ -259,7 +266,6 @@ def detect_face(frame):
 
     return None, None, None, None, None
 
-
 # Calculate depth variance to detect flat surfaces (like photos)
 def analyze_depth(depth_points):
     # Extract z-coordinates
@@ -272,7 +278,6 @@ def analyze_depth(depth_points):
     depth_range = (max(z_values) - min(z_values)) * 1000
 
     return depth_variance, depth_range
-
 
 # Detect head movement with 3D rotation analysis
 def detect_head_movement(current_landmarks, previous_landmarks, threshold=0.35):
@@ -313,7 +318,6 @@ def detect_head_movement(current_landmarks, previous_landmarks, threshold=0.35):
     # Return if movement exceeds threshold and rotation angles
     return avg_movement > threshold, avg_movement, (avg_pitch, avg_yaw)
 
-
 # Detect micro-movements with temporal consistency
 def detect_micro_movements(landmarks_history, frames=8):
     if len(landmarks_history) < frames:
@@ -340,7 +344,6 @@ def detect_micro_movements(landmarks_history, frames=8):
     is_natural = 0.01 < avg_variance < 12.0
 
     return is_natural, avg_variance
-
 
 # Texture analysis with LBP for replay detection
 def analyze_texture_lbp(face_img):
@@ -371,7 +374,6 @@ def analyze_texture_lbp(face_img):
 
     return is_real_face, (entropy, uniformity)
 
-
 # Adaptive lighting-based EAR threshold
 def get_adaptive_ear_threshold(frame):
     # Calculate average brightness of the frame
@@ -386,7 +388,6 @@ def get_adaptive_ear_threshold(frame):
         return 0.25
     else:  # Normal lighting
         return 0.22
-
 
 # Register a student's face
 def register_student():
@@ -424,7 +425,6 @@ def register_student():
         import traceback
         traceback.print_exc()
         return None
-
 
 # Recognize a face using the webcam with 2023-2024 anti-spoofing measures
 def recognize_face(registered_features):
@@ -894,7 +894,6 @@ def recognize_face(registered_features):
         import traceback
         traceback.print_exc()
         return False
-
 
 def recognize_face_web(registered_features):
     """

@@ -27,4 +27,5 @@ urlpatterns = [
     path('counselor/leave/filter/', views.filter_leaves, name='filter_leaves'),
     path('counselor/weekly_reports/', views.counselor_weekly_reports, name='counselor_weekly_reports'),
     path("download_attendance/", views.download_attendance, name="download_attendance"),
+    path('counselor/attendance/', views.counselor_attendance, name='counselor_attendance'),
 ]
