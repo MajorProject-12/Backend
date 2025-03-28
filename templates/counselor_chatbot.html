@@ -1,0 +1,555 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoMate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="{% static 'js/header.js' %}"></script>
+    <style>
+        body {
+            background-color: #F8F9FC;
+            font-family: Outfit, sans-serif;
+            background: url("images/Background2.svg") no-repeat top center;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            background-color: #000;
+            min-height: 100vh;
+            font-family: sans-serif;
+        }
+
+        .content{
+            margin: 35px;
+            border: none;
+            border-radius: 1.5rem;
+            padding-top: 25px;
+            padding-bottom: 25px;
+        }
+
+        .content-wrapper{
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-title{
+            font-size: 40px;
+            text-align: left;
+            font-family: Outfit, sans-serif;
+        }
+
+        .title-wrapper {
+            margin-left: 50px;
+            width: fit-content;
+            float: left;
+        }
+
+        .illustration{
+            height: 25rem;
+        }
+
+        .section-empty{
+            display: block;
+            align-self: center;
+            text-align: center;
+            font-size: 25px;
+            font-family: Outfit, sans-serif;
+            margin-top: -100px;
+        }
+
+        #nav-item5 {
+            background-color: #8d939d;
+            border-radius: 10px;
+            border: 10px;
+        }
+
+        /* Chatbot styles */
+        .chat-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #000;
+            background-size: cover;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .chat-messages {
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            flex-grow: 1;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 8px 10px;
+            max-width: 80%;
+            display: flex;
+            align-items: flex-start;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+
+        .bot-message {
+            background-color: #e1f5fe;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+
+        .user-message {
+            background-color: #c8e6c9;
+            align-self: flex-end;
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+
+        .message img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #f1f1f1;
+            background: white;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .chat-input button {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .chat-input button img {
+            width: 30px;
+            height: 30px;
+        }
+
+        /* Fix for excessive spacing */
+        .message-text {
+            margin: 0 10px;
+            word-wrap: break-word;
+            white-space: normal;
+            line-height: 1.4;
+        }
+
+        /* Remove extra spacing between paragraphs */
+        .message-text p {
+            margin: 0 0 8px 0;
+        }
+
+        /* Last paragraph has no bottom margin */
+        .message-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Clean up list spacing */
+        .message-text ul, .message-text ol {
+            margin: 0 0 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-text ul:last-child,
+        .message-text ol:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-text li {
+            margin: 0 0 4px 0;
+        }
+
+        .message-text li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Remove empty paragraphs and extra whitespace */
+        .message-text br:first-child,
+        .message-text br + br,
+        .message-text p:empty {
+            display: none;
+        }
+
+        /* HTML message specific fixes (for markdown content) */
+        .message-html {
+            white-space: normal;
+        }
+
+        .message-html * {
+            margin-top: 0;
+        }
+
+        .message-html p {
+            margin: 0 0 8px 0;
+        }
+
+        .message-html > *:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-html h1, .message-html h2, .message-html h3,
+        .message-html h4, .message-html h5, .message-html h6 {
+            margin: 12px 0 6px 0;
+        }
+
+        .message-html ul, .message-html ol {
+            margin: 0 0 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-html li {
+            margin: 0 0 2px 0;
+        }
+
+        @media (max-width: 600px) {
+            body { overflow-x: hidden; }
+            .content{ margin: 10px; }
+            .content-wrapper{ gap: 50px; }
+            .illustration{ height: 17rem; }
+            .section-empty{ margin-top: -20px; }
+            .section-empty-text{ margin-bottom: 10%; }
+        }
+    </style>
+</head>
+<body style="background-image: url({% static 'images/Background2.svg' %})">
+    <header>
+        <div class="logo-container">
+            <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
+        </div>
+        <nav class="nav-content">
+            <div class="nav-links">
+                <a href="{% url 'counselor_dashboard' %}" class="nav-item" id="nav-item0">Dashboard</a>
+                <a href="{% url 'counselor_attendance' %}" class="nav-item" id="nav-item4">Attendance Status</a>
+                <a href="{% url 'counselor_insights' %}" class="nav-item" id="nav-item1">Student Insights</a>
+                <a href="{% url 'counselor_leave' %}" class="nav-item" id="nav-item2">Leave Applications</a>
+                <a href="{% url 'counselor_weekly_reports' %}" class="nav-item" id="nav-item3">Weekly Reports</a>
+                <a href="{% url 'counselor_chatbot' %}" class="nav-item active" id="nav-item5">InfoMate</a>
+            </div>
+        </nav>
+
+        <div class="right-container">
+            <div class="notifications" id="notifications">
+                <img alt="Notifications icon" height="25px" src="{% static 'images/icons/Notifications.svg' %}" />
+            </div>
+            <div class="burger-menu" id="burger-menu">
+                <img src="{% static 'images/icons/burger-menu.svg' %}" alt="burger-menu-icon">
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="notification-dropdown-menu">
+            <h2>Notifications</h2>
+            <a class="menu-item" href="#">Notification 1</a>
+            <a class="menu-item" href="#">Notification 2</a>
+            <a class="menu-item" href="#">Notification 3</a>
+            <div class="footer">
+                <span>View All</span>
+            </div>
+        </div>
+
+        <div class="burger-dropdown" id="burger-dropdown">
+            <h2>Menu</h2>
+            <a class="menu-item" href="{% url 'counselor_dashboard' %}">Dashboard</a>
+            <a class="menu-item" href="{% url 'counselor_insights' %}">Student Insights</a>
+            <a class="menu-item" href="{% url 'counselor_attendance' %}">Attendance Status</a>
+            <a class="menu-item" href="{% url 'counselor_leave' %}">Leave Applications</a>
+            <a class="menu-item" href="{% url 'counselor_weekly_reports' %}">Weekly Reports</a>
+            <a class="menu-item" href="{% url 'counselor_chatbot' %}">InfoMate</a>
+
+            <hr>
+            <a class="menu-item" href="#">Profile</a>
+            <a class="menu-item" href="#">Settings</a>
+            <div class="footer">
+                <a href="#" id="faqs"><span>FAQs</span></a>
+                <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+            </div>
+        </div>
+
+        <div class="profile-container" id="profile-container">
+            <div class="profile" id="profile">
+                <img alt="User profile picture" height="45px" src="{% static 'images/icons/profile.svg' %}" />
+                <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu">
+                <h2>Hello {{ counselor.user.username }}!</h2>
+                <a class="menu-item" href="#">Profile</a>
+                <a class="menu-item" href="#">Settings</a>
+                <div class="footer">
+                    <a href="#" id="faqs"><span>FAQs</span></a>
+                    <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="content">
+        <main class="content-wrapper">
+            <div class="chat-container bg-light-subtle" id="chat-container">
+                <div class="chat-header">
+                    <h5>InfoMate - Student Data Assistant</h5>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message bot-message">
+<!--                        <img src="{% static 'images/icons/chat-bot-msg.svg' %}" alt="Bot" class="avatar">-->
+                        <div class="message-text">
+                            <p>Hello {{ counselor.user.username }}! I'm InfoMate, your student data assistant.</p>
+                            <p>You can ask me questions about:</p>
+                            <ul class="bot-list">
+                                <li>Student attendance statistics</li>
+                                <li>Students with low attendance</li>
+                                <li>Pending leave applications</li>
+                                <li>Recent student remarks and sentiment</li>
+                                <li>Weekly reports summaries</li>
+                                <li>Information about specific students</li>
+                            </ul>
+                            <p>How can I help you today?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="user-input" placeholder="InfoMate is ready to answer your question" disabled>
+<!--                    <button  disabled>-->
+<!--&lt;!&ndash;                        <img src="{% static 'images/icons/sendicon.svg' %}" alt="Send">&ndash;&gt;-->
+<!--                    </button>-->
+                    <button id="send-message" style="background-color: green; color: white;" type="submit" value="Submit">Send</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // Function to clean HTML content and remove excess whitespace
+        function cleanMessageContent(element) {
+            // Remove all text nodes that are just whitespace
+            element.childNodes.forEach(node => {
+                if (node.nodeType === 3 && node.nodeValue.trim() === '') {
+                    node.remove();
+                }
+            });
+
+            // Remove any empty paragraphs and excess breaks
+            element.querySelectorAll('p:empty, br + br').forEach(el => {
+                el.remove();
+            });
+
+            // Fix line height for specific elements
+            element.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6').forEach(el => {
+                el.style.lineHeight = '1.4';
+            });
+        }
+
+        // Wait for the DOM to load
+        document.addEventListener("DOMContentLoaded", function () {
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-message');
+            const chatMessages = document.getElementById('chat-messages');
+
+            // Clean welcome message
+            const welcomeMessage = document.querySelector('.message-text');
+            if (welcomeMessage) {
+                cleanMessageContent(welcomeMessage);
+            }
+
+            // Enable input for the first message
+            enableInput();
+
+            // Send message function
+            function sendMessage() {
+                if (userInput.disabled) return; // Prevent sending if already processing a message
+
+                const message = userInput.value.trim();
+                if (message === '') return;
+
+                // Add user message to chat
+                addMessage('user-message', message, '{% static "images/icons/user-chat-bot.svg" %}');
+                userInput.value = '';
+
+                // Disable input while waiting for response
+                userInput.disabled = true;
+                sendButton.disabled = true;
+
+                // Add typing indicator
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'message bot-message typing-indicator';
+                typingIndicator.innerHTML = `
+<!--                    <img src="{% static 'images/icons/chat-bot-msg.svg' %}" alt="Bot" class="avatar">-->
+                    <div class="message-text">Thinking...</div>
+                `;
+                chatMessages.appendChild(typingIndicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Send request to server
+                fetch('{% url "chatbot_response" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove typing indicator
+                    chatMessages.removeChild(typingIndicator);
+
+                    if (data.success) {
+                        // Check if the response is HTML or plain text
+                        if (data.is_html) {
+                            // Add HTML response (rendered directly)
+                            addHtmlMessage('bot-message', data.response, '{% static "images/icons/chat-bot-msg.svg" %}');
+                        } else {
+                            // Add regular text response
+                            addMessage('bot-message', data.response, '{% static "images/icons/chat-bot-msg.svg" %}');
+                        }
+                    } else {
+                        addMessage('bot-message', 'Sorry, I encountered an error processing your request. Please try again.', '{% static "images/icons/chat-bot-msg.svg" %}');
+                    }
+
+                    // Enable input immediately after receiving response
+                    enableInput();
+                })
+                .catch(error => {
+                    // Remove typing indicator
+                    chatMessages.removeChild(typingIndicator);
+
+                    console.error('Error:', error);
+                    addMessage('bot-message', 'Sorry, there was a network error. Please try again later.', '{% static "images/icons/chat-bot-msg.svg" %}');
+                    enableInput();
+                });
+            }
+
+            // Function to enable the input
+            function enableInput() {
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.placeholder = "InfoMate is ready to answer your question";
+                userInput.focus(); // Optional: focus the input for better UX
+            }
+
+            // Add regular text message to the chat
+            function addMessage(className, text, icon) {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${className}`;
+
+                // Create the message content with icon
+                const messageContent = `
+<!--                    <img src="${icon}" alt="avatar" class="avatar">-->
+                    <div class="message-text">${text}</div>
+                `;
+
+                messageElement.innerHTML = messageContent;
+
+                // Clean the message content
+                cleanMessageContent(messageElement.querySelector('.message-text'));
+
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Add HTML message to the chat (for formatted responses)
+            function addHtmlMessage(className, htmlContent, icon) {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${className}`;
+
+                // Create container with icon
+                const messageHtml = `
+<!--                    <img src="${icon}" alt="avatar" class="avatar">-->
+                    <div class="message-text message-html"></div>
+                `;
+
+                messageElement.innerHTML = messageHtml;
+
+                // Get the message-text div and set its HTML content
+                const messageTextDiv = messageElement.querySelector('.message-text');
+                messageTextDiv.innerHTML = htmlContent;
+
+                // Clean the content
+                cleanMessageContent(messageTextDiv);
+
+                // Add CSS for better formatting of HTML content
+                messageTextDiv.style.overflow = 'auto';
+
+                // Add styles for tables if present
+                const tables = messageTextDiv.querySelectorAll('table');
+                tables.forEach(table => {
+                    table.style.borderCollapse = 'collapse';
+                    table.style.width = '100%';
+                    table.style.margin = '8px 0'; // Reduced margin
+
+                    const cells = table.querySelectorAll('th, td');
+                    cells.forEach(cell => {
+                        cell.style.border = '1px solid #ddd';
+                        cell.style.padding = '8px';
+                        cell.style.textAlign = 'left';
+                    });
+
+                    const headers = table.querySelectorAll('th');
+                    headers.forEach(header => {
+                        header.style.backgroundColor = '#f2f2f2';
+                        header.style.color = '#333';
+                    });
+                });
+
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Add keypress listener for Enter
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !userInput.disabled) {
+                    sendMessage();
+                }
+            });
+
+            // Add click listener for the Send button
+            sendButton.addEventListener('click', function() {
+                sendMessage();
+            });
+        });
+    </script>
+</body>
+</html>

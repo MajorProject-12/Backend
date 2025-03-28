@@ -176,3 +176,4 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'grimerghost2003@gmail.com'
 EMAIL_HOST_PASSWORD = 'pzub ddfo rvdv koca'
+GEMINI_API_KEY = 'AIzaSyDoByBtUxwgu5t_X13HE4RqGA4_YrOYoBQ'

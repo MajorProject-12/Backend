@@ -2,7 +2,7 @@
 from django.contrib.auth import authenticate, login, logout
 import random
 import string
-
+import json
 from attendance.models import Attendance
 from authentication.models import CustomUser
 from django.conf import settings
@@ -1028,3 +1028,41 @@ def counselor_attendance(request):
     except Exception as e:
         messages.error(request, f"Error loading attendance data: {str(e)}")
         return redirect('counselor_dashboard')
+
+@login_required
+def counselor_chatbot(request):
+    """View for counselor chatbot page"""
+    try:
+        counselor = get_object_or_404(Counselor, user=request.user)
+        context = {
+            'counselor': counselor,
+        }
+        return render(request, 'counselor_chatbot.html', context)
+    except Exception as e:
+        messages.error(request, f"Error loading chatbot: {str(e)}")
+        return redirect('counselor_dashboard')
+
+@login_required
+def chatbot_response(request):
+    """API endpoint to handle chatbot requests"""
+    if request.method == 'POST':
+        try:
+            counselor = get_object_or_404(Counselor, user=request.user)
+            data = json.loads(request.body)
+            user_message = data.get('message', '')
+
+            if not user_message:
+                return JsonResponse({'success': False, 'message': 'Empty message'}, status=400)
+
+            # Process the message with Gemini
+            from .gemini_chat import chat
+            # Response is now HTML
+            html_response = chat(user_message, counselor)
+
+            return JsonResponse({'success': True, 'response': html_response, 'is_html': True})
+
+        except Exception as e:
+            print(f"Error in chatbot_response: {e}")
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)

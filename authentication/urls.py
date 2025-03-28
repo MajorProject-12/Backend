@@ -28,4 +28,6 @@ urlpatterns = [
     path('counselor/weekly_reports/', views.counselor_weekly_reports, name='counselor_weekly_reports'),
     path("download_attendance/", views.download_attendance, name="download_attendance"),
     path('counselor/attendance/', views.counselor_attendance, name='counselor_attendance'),
+    path('counselor/infomate/', views.counselor_chatbot, name='counselor_chatbot'),
+    path('counselor/chatbot-response/', views.chatbot_response, name='chatbot_response'),
 ]
