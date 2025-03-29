@@ -18,6 +18,7 @@ urlpatterns = [
     path('student/leave/', views.student_leave, name='student_leave'),
     path('student/weekly_reports/', views.student_weekly_report, name='student_weekly_reports'),
     path('student/student_DocRAG/', views.student_DocRAG, name='student_DocRAG'),
+    path('student/announcements/', views.student_announcements, name='student_announcements'),
 
     # Counselor URLs
     path('counselor/dashboard/', views.counselor_dashboard, name='counselor_dashboard'),
@@ -30,4 +31,5 @@ urlpatterns = [
     path('counselor/attendance/', views.counselor_attendance, name='counselor_attendance'),
     path('counselor/infomate/', views.counselor_chatbot, name='counselor_chatbot'),
     path('counselor/chatbot-response/', views.chatbot_response, name='chatbot_response'),
+    path('counselor/announcements/', views.counselor_announcements, name='counselor_announcements'),
 ]

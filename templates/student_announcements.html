@@ -1,19 +1,18 @@
-<!--templates/leave/student_leave.html-->
+<!--templates/student_announcements.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leave Application</title>
+    <title>Announcements</title>
     {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
-    <link rel="stylesheet" href="{% static 'css/student_leave.css' %}">
+    <link rel="stylesheet" href="{% static 'css/student_announcements.css' %}">
     <script src="{% static 'js/header.js' %}"></script>
-    <script src="{% static 'js/student_leave.js' %}"></script>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
     <header>
@@ -22,13 +21,13 @@
         </div>
         <nav class="nav-content">
             <div class="nav-links">
-                <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
+                <a href="{% url 'student_dashboard' %}" class="nav-item">Dashboard</a>
                 <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
-<!--                <a href="#" class="nav-item" id="nav-item2">Statistics</a>-->
+                <a href="{% url 'student_statistics' %}" class="nav-item" id="nav-item2">Statistics</a>
                 <a href="{% url 'student_remarks' %}" class="nav-item" id="nav-item3">Remarks</a>
                 <a href="{% url 'student_leave' %}" class="nav-item" id="nav-item4">Leave Application</a>
                 <a href="{% url 'student_weekly_reports' %}" class="nav-item" id="nav-item5">Weekly Report</a>
-                <a href="{% url 'student_DocRAG' %}" class="nav-item" id="nav-item6">DocRAG</a>
+                <a href="{% url 'student_DocRAG' %}" class="nav-item" id="nav-item6">QA Bot</a>
                 <a href="{% url 'student_announcements' %}" class="nav-item active" id="nav-item7">Announcements</a>
             </div>
         </nav>
@@ -56,9 +55,12 @@
             <h2>Menu</h2>
             <a class="menu-item" href="{% url 'student_dashboard' %}">Dashboard</a>
             <a class="menu-item" href="{% url 'student_check_in' %}">Check In</a>
-            <a class="menu-item" href="#">Statistics</a>
+            <a class="menu-item" href="{% url 'student_statistics' %}">Statistics</a>
             <a class="menu-item" href="{% url 'student_remarks' %}">Remarks</a>
             <a class="menu-item" href="{% url 'student_leave' %}">Leave Application</a>
+            <a class="menu-item" href="{% url 'student_weekly_reports' %}">Weekly Report</a>
+            <a class="menu-item" href="{% url 'student_DocRAG' %}">QA Bot</a>
+            <a class="menu-item" href="{% url 'student_announcements' %}">Announcements</a>
             <hr>
             <a class="menu-item" href="{% url 'profile' %}">Profile</a>
             <a class="menu-item" href="#">Settings</a>
@@ -87,70 +89,47 @@
 
     <div class="content">
         <main class="content-wrapper">
-
-            <div class="container-1">
-                <h1>Send Leave Application</h1>
-                <form method="POST" action="{% url 'student_leave' %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="date">Date</label>
-                        <div class="input-icon">
-                            <input type="date" id="date" name="date" placeholder="YYYY/MM/DD" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="days">Number of Days</label>
-                        <input type="number" id="days" name="days" placeholder="No. of days" required min="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="reason">Reason</label>
-                        <textarea id="reason" name="reason" placeholder="Reason for being absent.........................................................." required></textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="submit-btn">Submit</button>
-                        <button type="reset" class="reset-btn">Reset</button>
-                    </div>
-                </form>
+            <div class="sidebar">
+                <h2>Announcements</h2>
             </div>
 
             <div class="container-2">
-                <h1>Absence records</h1>
+                <h1>Announcements from Counselor</h1>
                 <table>
                     <thead>
                         <tr>
-                            <th>S.No</th>
                             <th>Date</th>
-                            <th>Absence reason</th>
-                            <th>Number of Days</th>
-                            <th>Status</th>
+                            <th>Time</th>
+                            <th>Announcement</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for record in leave_records %}
+                        {% for announcement in announcements %}
                         <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ record.date|date:"d/m/Y" }}</td>
-                            <td>{{ record.reason }}</td>
-                            <td>{{ record.no_of_days }} day{% if record.no_of_days > 1 %}s{% endif %}</td>
-                            <td><span class="status {{ record.status|lower }}">{{ record.status }}</span></td>
+                            <td class="date-col">{{ announcement.date|date:"Y-m-d" }}</td>
+                            <td class="time-col">{{ announcement.time|time:"h:i A" }}</td>
+                            <td class="message-col">{{ announcement.message }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center">No leave records found.</td>
+                            <td colspan="3" class="text-center">No announcements from your counselor yet.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-
-            <div class="sidebar">
-                <h2>Leave<br>Application</h2>
-                <div class="button-container">
-                    <button class="new">New</button>
-                    <button class="records">Records</button>
-                </div>
-            </div>
         </main>
     </div>
+
+    <!-- Display Django messages -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if messages %}
+            {% for message in messages %}
+                alert("{{ message|escapejs }}");
+            {% endfor %}
+        {% endif %}
+    });
+    </script>
 </body>
 </html>

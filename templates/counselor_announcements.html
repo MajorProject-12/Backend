@@ -1,35 +1,35 @@
-<!--templates/student_weekly_reports.html-->
+<!--templates/counselor_announcements.html-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Report</title>
+    <title>Announcements</title>
     {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/Logo.svg' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
-    <link rel="stylesheet" href="{% static 'css/student_weekly_reports.css' %}">
+    <link rel="stylesheet" href="{% static 'css/counselor_announcements.css' %}">
     <script src="{% static 'js/header.js' %}"></script>
-    <script src="{% static 'js/student_weekly_reports.js' %}"></script>
 </head>
 <body style="background-image: url({% static 'images/Background2.svg' %})">
+
     <header>
         <div class="logo-container">
             <img id="logo" src="{% static 'images/Logo.svg' %}" alt="Logo" height="50px">
         </div>
         <nav class="nav-content">
             <div class="nav-links">
-                <a href="{% url 'student_dashboard' %}" class="nav-item" >Dashboard</a>
-                <a href="{% url 'student_check_in' %}" class="nav-item" id="nav-item1">Check In</a>
-<!--                <a href="{% url 'student_statistics' %}" class="nav-item" id="nav-item2">Statistics</a>-->
-                <a href="{% url 'student_remarks' %}" class="nav-item" id="nav-item3">Remarks</a>
-                <a href="{% url 'student_leave' %}" class="nav-item" id="nav-item4">Leave Application</a>
-                <a href="#" class="nav-item" id="nav-item5">Weekly Report</a>
-                <a href="{% url 'student_DocRAG' %}" class="nav-item" id="nav-item6">DocRAG</a>
-                <a href="{% url 'student_announcements' %}" class="nav-item active" id="nav-item7">Announcements</a>
+                <a href="{% url 'counselor_dashboard' %}" class="nav-item" id="nav-item0">Dashboard</a>
+                <a href="{% url 'counselor_attendance' %}" class="nav-item" id="nav-item4">Attendance Status</a>
+                <a href="{% url 'counselor_insights' %}" class="nav-item" id="nav-item1">Student Insights</a>
+                <a href="{% url 'counselor_leave' %}" class="nav-item" id="nav-item2">Leave Applications</a>
+                <a href="{% url 'counselor_weekly_reports' %}" class="nav-item" id="nav-item3">Weekly Reports</a>
+                <a href="{% url 'counselor_chatbot' %}" class="nav-item" id="nav-item5">InfoMate</a>
+                <a href="{% url 'counselor_announcements' %}" class="nav-item active" id="nav-item6">Announcements</a>
             </div>
         </nav>
 
@@ -54,15 +54,16 @@
 
         <div class="burger-dropdown" id="burger-dropdown">
             <h2>Menu</h2>
-            <a class="menu-item" href="{% url 'student_dashboard' %}">Dashboard</a>
-            <a class="menu-item" href="{% url 'student_check_in' %}">Check In</a>
-            <a class="menu-item" href="{% url 'student_statistics' %}">Statistics</a>
-            <a class="menu-item" href="{% url 'student_remarks' %}">Remarks</a>
-            <a class="menu-item" href="{% url 'student_leave' %}">Leave Application</a>
-            <a class="menu-item" href="{% url 'student_weekly_reports' %}">Weekly Report</a>
+            <a class="menu-item" href="{% url 'counselor_dashboard' %}">Dashboard</a>
+            <a class="menu-item" href="{% url 'counselor_insights' %}">Student Insights</a>
+            <a class="menu-item" href="{% url 'counselor_attendance' %}">Absentees</a>
+            <a class="menu-item" href="{% url 'counselor_leave' %}">Leave Applications</a>
+            <a class="menu-item" href="{% url 'counselor_weekly_reports' %}">Weekly Reports</a>
+            <a class="menu-item" href="{% url 'counselor_chatbot' %}">InfoMate</a>
+            <a class="menu-item" href="{% url 'counselor_announcements' %}">Announcements</a>
             <hr>
-            <a class="menu-item" href="{% url 'profile' %}">Profile</a>
-            <a class="menu-item" href="#">Settings</a>
+<!--            <a class="menu-item" href="#">Profile</a>-->
+<!--            <a class="menu-item" href="#">Settings</a>-->
             <div class="footer">
                 <a href="#" id="faqs"><span>FAQs</span></a>
                 <a href="{% url 'logout' %}" id="sign_out">Sign out</a>
@@ -75,11 +76,11 @@
                 <img src="{% static 'images/icons/Arrow.svg' %}" alt="arrow" id="dropdown-icon">
             </div>
             <div class="dropdown-menu" id="dropdown-menu">
-                <h2>Hello <br> {{ student.user.username }}!</h2>
-                <a class="menu-item" href="{% url 'profile' %}">Profile</a>
+                <h2>Hello {{ counselor.user.username }}!</h2>
+                <a class="menu-item" href="#">Profile</a>
                 <a class="menu-item" href="#">Settings</a>
                 <div class="footer">
-                    <a href="#"><span>FAQs</span></a>
+                    <a href="#" id="faqs"><span>FAQs</span></a>
                     <a href="{% url 'logout' %}">Sign out</a>
                 </div>
             </div>
@@ -88,61 +89,61 @@
 
     <div class="content">
         <main class="content-wrapper">
+            <div class="sidebar">
+                <h2>Announcements</h2>
+            </div>
+
             <div class="container-1">
-                <h1>Send Weekly Report</h1>
-                <form method="POST" action="{% url 'student_weekly_reports' %}">
+                <h1>Send Announcement</h1>
+                <form method="POST" action="{% url 'counselor_announcements' %}">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="date">Date</label>
-                        <div class="input-icon">
-                            <input type="date" id="date" name="date" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="work_done">Work done</label>
-                        <textarea id="work_done" name="work_done" class="form-control" placeholder="Ex: 1. completed courses&#10;    2. participated activities...etc&#10;    Note: enter data in points" required></textarea>
+                        <textarea id="msg" name="msg" placeholder="Type Your Message................."></textarea>
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="submit-btn">Submit</button>
+                        <button type="submit" class="submit-btn">Send<i class="fas fa-paper-plane msg-icon"></i></button>
                         <button type="reset" class="reset-btn">Reset</button>
                     </div>
                 </form>
             </div>
 
             <div class="container-2">
-                <h1>Reports Archive</h1>
+                <h1>Announcement History</h1>
                 <table>
                     <thead>
                         <tr>
-                            <th>S.No</th>
                             <th>Date</th>
-                            <th>Work Done</th>
+                            <th>Time</th>
+                            <th>Announcement</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for report in student_reports %}
+                        {% for announcement in announcements %}
                         <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ report.date|date:"d/m/Y" }}</td>
-                            <td>{{ report.work_done }}</td>
+                            <td class="date-col">{{ announcement.date|date:"Y-m-d" }}</td>
+                            <td class="time-col">{{ announcement.time|time:"h:i A" }}</td>
+                            <td class="message-col">{{ announcement.message }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="3" class="text-center">No reports submitted yet.</td>
+                            <td colspan="3" class="text-center">No announcements yet.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-
-            <div class="sidebar">
-                <h2>Weekly<br>Reports</h2>
-                <div class="button-container">
-                    <button class="new">New</button>
-                    <button class="records">Archive</button>
-                </div>
-            </div>
         </main>
     </div>
+
+    <!-- Display Django messages -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if messages %}
+            {% for message in messages %}
+                alert("{{ message|escapejs }}");
+            {% endfor %}
+        {% endif %}
+    });
+    </script>
 </body>
 </html>

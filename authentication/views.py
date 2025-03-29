@@ -16,7 +16,7 @@ from leave.models import StudentLeave
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from authentication.models import Counselor
+from authentication.models import Counselor, Announcement
 import pandas as pd
 from django.http import HttpResponse
 from io import BytesIO
@@ -440,6 +440,31 @@ def student_DocRAG(request):
     }
     return render(request, 'student_qabot.html', context)
 
+@login_required
+def student_announcements(request):
+    """View for students to view announcements from their counselor"""
+    try:
+        student = get_object_or_404(Student, user=request.user)
+    except Exception:
+        messages.error(request, "You don't have a student profile.")
+        return redirect('student_dashboard')
+
+    # Get the student's counselor
+    counselor = student.counselor
+
+    if counselor:
+        # Get all announcements from this student's counselor
+        announcements = Announcement.objects.filter(counselor=counselor).order_by('-date', '-time')
+    else:
+        announcements = []
+        messages.info(request, "You don't have an assigned counselor yet.")
+
+    context = {
+        'student': student,
+        'announcements': announcements
+    }
+
+    return render(request, 'student_announcements.html', context)
 
 #############################################################
 #                  Counselor Views                          #
@@ -1066,3 +1091,98 @@ def chatbot_response(request):
             return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+
+
+# announcements/views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.utils import timezone
+from .models import Announcement
+from authentication.models import Counselor, Student
+
+
+@login_required
+def counselor_announcements(request):
+    """View for counselors to send and view announcements"""
+    try:
+        counselor = get_object_or_404(Counselor, user=request.user)
+    except Exception:
+        messages.error(request, "You don't have a counselor profile.")
+        return redirect('counselor_dashboard')
+
+    if request.method == 'POST':
+        message = request.POST.get('msg', '').strip()
+
+        if message:
+            # Create the announcement
+            now = timezone.now()
+            announcement = Announcement.objects.create(
+                counselor=counselor,
+                message=message,
+                date=now.date(),
+                time=now.time()
+            )
+
+            # Notify assigned students via email (optional)
+            assigned_students = Student.objects.filter(counselor=counselor)
+            for student in assigned_students:
+                if student.user.email:
+                    try:
+                        from email_utils import send_html_email
+                        subject = f"New Announcement from {counselor.user.username}"
+                        html_message = f"""
+                        <html>
+                        <head>
+                            <style>
+                                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                                .header {{ background-color: #4A90E2; color: white; padding: 10px 20px; border-radius: 5px 5px 0 0; }}
+                                .content {{ padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
+                                .footer {{ margin-top: 20px; font-size: 12px; color: #777; }}
+                                .message {{ margin: 15px 0; background-color: #f9f9f9; padding: 15px; border-radius: 5px; }}
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <div class="header">
+                                    <h2>New Announcement</h2>
+                                </div>
+                                <div class="content">
+                                    <p>Dear {student.user.username},</p>
+                                    <p>Your counselor has posted a new announcement:</p>
+                                    <div class="message">"{message}"</div>
+                                    <p>You can view all announcements in your student portal.</p>
+                                    <p>Best regards,<br>
+                                    Student Management System</p>
+                                </div>
+                                <div class="footer">
+                                    <p>This is an automated message. Please do not reply to this email.</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>
+                        """
+                        send_html_email(
+                            subject=subject,
+                            html_message=html_message,
+                            recipient_list=[student.user.email],
+                            from_email=settings.DEFAULT_FROM_EMAIL
+                        )
+                    except Exception as e:
+                        print(f"Error sending email notification: {str(e)}")
+
+            messages.success(request, "Announcement sent successfully!")
+            return redirect('counselor_announcements')
+        else:
+            messages.error(request, "Please enter a message.")
+
+    # Get all announcements by this counselor
+    announcements = Announcement.objects.filter(counselor=counselor).order_by('-date', '-time')
+
+    context = {
+        'counselor': counselor,
+        'announcements': announcements
+    }
+
+    return render(request, 'counselor_announcements.html', context)
