@@ -13,8 +13,8 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from authentication.models import Student
 from .models import Attendance, FaceRegistration
-# from .frs import detect_face, extract_features, recognize_face, process_frame_with_dimensions
-from .FasterRCNN_frs import detect_face, extract_features, recognize_face, process_frame_with_dimensions
+from .frs import detect_face, extract_features, recognize_face, process_frame_with_dimensions
+# from .FasterRCNN_frs import detect_face, extract_features, recognize_face, process_frame_with_dimensions
 
 # Maintain a global dictionary to store streams for each user session
 active_streams = {}

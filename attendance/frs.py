@@ -67,14 +67,12 @@ def preprocess_image(image):
     img = cv2.resize(image, (160, 160))
     return np.expand_dims(img, axis=0)
 
-
 # Extract features from an image using FaceNet
 def extract_features(img):
     img = preprocess_image(img)
     features = embedder.embeddings(img)
     normalized_features = normalize(features)
     return normalized_features.flatten()
-
 
 # Calculate Eye Aspect Ratio (EAR)
 def calculate_ear(eye_landmarks):
@@ -88,7 +86,6 @@ def calculate_ear(eye_landmarks):
     # Calculate the eye aspect ratio
     ear = (A + B) / (2.0 * C)
     return ear
-
 
 # Detect face and extract face area using MediaPipe with 3D data
 def detect_face(frame):
@@ -149,7 +146,6 @@ def detect_face(frame):
 
         return face_area, (left_eye, right_eye), face_box, depth_points, landmarks_3d
 
-
 # Calculate depth variance to detect flat surfaces (like photos)
 def analyze_depth(depth_points):
     # Extract z-coordinates
@@ -162,7 +158,6 @@ def analyze_depth(depth_points):
     depth_range = (max(z_values) - min(z_values)) * 1000
 
     return depth_variance, depth_range
-
 
 # Detect head movement with 3D rotation analysis
 def detect_head_movement(current_landmarks, previous_landmarks, threshold=0.35):

@@ -23,6 +23,7 @@ from io import BytesIO
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Student
+from .email_utils import send_html_email
 
 #############################################################
 #                   Student Views                           #
@@ -310,7 +311,7 @@ def student_leave(request):
         </html>
         """
 
-        from email_utils import send_html_email
+        # from .email_utils import send_html_email
         send_html_email(
             subject=subject,
             html_message=html_message,
@@ -405,7 +406,6 @@ def student_weekly_report(request):
                 </html>
                 """
 
-                from email_utils import send_html_email
                 send_html_email(
                     subject=subject,
                     html_message=html_message,
@@ -625,7 +625,7 @@ def update_leave_status(request):
             </html>
             """
 
-            from email_utils import send_html_email
+            # from .email_utils import send_html_email
             send_html_email(
                 subject=subject,
                 html_message=html_message,
@@ -849,7 +849,7 @@ def student_insights(request):
                         </html>
                         """
 
-                        from email_utils import send_html_email
+                        # from email_utils import send_html_email
                         send_html_email(
                             subject=subject,
                             html_message=html_message,
@@ -1129,7 +1129,7 @@ def counselor_announcements(request):
             for student in assigned_students:
                 if student.user.email:
                     try:
-                        from email_utils import send_html_email
+                        # from email_utils import send_html_email
                         subject = f"New Announcement from {counselor.user.username}"
                         html_message = f"""
                         <html>
