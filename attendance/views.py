@@ -15,6 +15,9 @@ from authentication.models import Student
 from .models import Attendance, FaceRegistration
 from .frs import detect_face, extract_features, recognize_face, process_frame_with_dimensions
 # from .FasterRCNN_frs import detect_face, extract_features, recognize_face, process_frame_with_dimensions
+# from .utils import recalc_attendance_percentage
+from .utils import update_attendance_percentage
+
 
 # Maintain a global dictionary to store streams for each user session
 active_streams = {}
@@ -240,29 +243,29 @@ def student_check_in(request):
         student = Student.objects.get(user=request.user)
         today = datetime.now().date()
 
-        # Get today's attendance status if it exists
-        try:
-            today_attendance = Attendance.objects.get(student=student, date=today)
-            today_status = today_attendance.status
-        except Attendance.DoesNotExist:
-            today_status = "Not Marked"
+        # Try to fetch today’s record; default to Absent if none exists
+        today_attendance = (
+            Attendance.objects
+            .filter(student=student, date=today)
+            .order_by('-time')
+            .first()
+        )
+        today_status = today_attendance.status if today_attendance else 'Absent'
 
-        # Format today's date
+        # Format today’s date
         today_date = today.strftime("%A, %B %d, %Y")
 
         return render(request, 'student_check_in.html', {
             'student': student,
             'today_date': today_date,
-            'today_status': today_status
+            'today_status': today_status,
         })
     except Student.DoesNotExist:
-        return redirect('login')  # Redirect to login if student not found
+        return redirect('login')
     except Exception as e:
-        print(f"Error in student_check_in view: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        print(f"Error in student_check_in view: {e}")
         messages.error(request, "An error occurred while loading the check-in page.")
-        return redirect('student_dashboard')  # Fallback to dashboard
+        return redirect('student_dashboard')
 
 @login_required
 @csrf_exempt
@@ -344,7 +347,7 @@ def start_attendance_verification(request):
             # Use recognize_face_web function with collected frames
             try:
                 # Import the necessary modules
-                from .frs import recognize_face_web
+                from .frs import recognize_face_web_no_blink
                 import importlib
 
                 # Set up global frames for processing
@@ -353,7 +356,7 @@ def start_attendance_verification(request):
                 frs_module.current_frame_index = 0
 
                 # Run the face recognition
-                recognition_result = recognize_face_web(registered_features)
+                recognition_result = recognize_face_web_no_blink(registered_features)
                 print(f"Recognition result: {recognition_result}")
 
                 if recognition_result:
@@ -375,6 +378,9 @@ def start_attendance_verification(request):
                         # Clear frames after successful attendance
                         active_streams[user_id].clear_frames()
 
+                        # recalc_attendance_percentage(student)
+                        is_present = (attendance.status == 'Present')
+                        update_attendance_percentage(student, is_present)
                         return JsonResponse({
                             'success': True,
                             'message': 'Attendance marked successfully!'
@@ -498,7 +504,7 @@ def mark_attendance(request):
                 print("Starting face recognition with liveness detection...")
 
                 # Import the necessary modules and functions
-                from .frs import recognize_face_web
+                from .frs import recognize_face_web_no_blink
                 import cv2
 
                 # Set up global frames for the video stream
@@ -510,7 +516,7 @@ def mark_attendance(request):
                 frs_module.current_frame_index = 0
 
                 # Call the function that uses video stream-like processing
-                recognition_result = recognize_face_web(registered_features)
+                recognition_result = recognize_face_web_no_blink(registered_features)
                 print(f"Recognition result: {recognition_result}")
 
                 if recognition_result:
@@ -530,6 +536,9 @@ def mark_attendance(request):
                         else:
                             print("Created new attendance record")
 
+                        # recalc_attendance_percentage(student)
+                        is_present = (attendance.status == 'Present')
+                        update_attendance_percentage(student, is_present)
                         return JsonResponse({
                             'success': True,
                             'message': 'Attendance marked successfully!',

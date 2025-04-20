@@ -77,9 +77,15 @@ def student_check_in(request):
 @login_required
 def student_dashboard(request):
     student = request.user.student
+    today = timezone.now().date()
+
+    # Safely get today's attendance record
+    attendance = Attendance.objects.filter(student=student, date=today).first()
+    attendance_status = attendance.status if attendance else "Not Checked In"
+
     context = {
         'student': student,
-        # 'courses': [],  # Uncomment if courses are used
+        'attendance_status': attendance_status,
     }
     return render(request, 'student_dashboard.html', context)
 

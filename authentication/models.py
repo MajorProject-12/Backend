@@ -75,7 +75,7 @@ class Student(models.Model):
 
 
 class Counselor(models.Model):
-    BRANCH_CHOICES = Student.BRANCH_CHOICES  # ✅ Avoid duplicate BRANCH_CHOICES
+    BRANCH_CHOICES = Student.BRANCH_CHOICES
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     branch = models.CharField(max_length=3, choices=BRANCH_CHOICES)

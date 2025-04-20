@@ -1050,6 +1050,109 @@ def recognize_face_web(registered_features):
         # Restore the original VideoCapture
         cv2.VideoCapture = original_video_capture
 
+# Append this to your frs.py
+
+def recognize_face_web_no_blink(registered_features):
+    """
+    Web-based face recognition WITHOUT blink detection.
+    Fusion weights adjusted: static=0.7, dynamic=0.3
+    """
+    global web_frames, current_frame_index
+
+    # Local fusion weights (override globals)
+    local_fusion = {'static': 0.7, 'dynamic': 0.3}
+
+    # Scores and flags (no blink tracking)
+    movement_detected = False
+    rotation_detected = False
+    depth_verified = False
+    texture_verified = False
+    micro_verified = False
+    verification_score = 0.0
+    face = None
+
+    # Thresholds
+    DEPTH_VAR_THRESH = 800.0
+    DEPTH_RANGE_THRESH = 30.0
+    MOVE_THRESH = 0.35
+    MOVE_FRAMES = 8
+    ROT_THRESH = 4.0
+
+    # History buffers
+    prev_landmarks = None
+    landmarks_hist = []
+    frame_hist = []
+    pitch_yaw = []
+
+    # Weighted fusion: blink is removed, so only static/dynamic
+    # Use WebVideoCapture as in recognize_face_web
+    class WebVideoCapture:
+        def __init__(self, _): self.index = 0
+        def isOpened(self): return True
+        def read(self):
+            global web_frames, current_frame_index
+            if current_frame_index < len(web_frames):
+                f = web_frames[current_frame_index]
+                current_frame_index += 1
+                return True, f
+            return False, None
+        def release(self): pass
+
+    # Monkey-patch
+    original_vc = cv2.VideoCapture
+    cv2.VideoCapture = WebVideoCapture
+
+    try:
+        cap = cv2.VideoCapture(0)
+        while True:
+            ret, frame = cap.read()
+            if not ret: break
+
+            # Depth verification
+            _, _, _, depth_pts, _ = detect_face(frame)
+            if depth_pts:
+                var, rng = analyze_depth(depth_pts)
+                if var > DEPTH_VAR_THRESH and rng > DEPTH_RANGE_THRESH:
+                    depth_verified = True
+
+            # Head movement
+            face, _, _, _, landmarks_3d = detect_face(frame)
+            if landmarks_3d is not None:
+                is_move, mv_amt, (p, y) = detect_head_movement(landmarks_3d, prev_landmarks, MOVE_THRESH)
+                prev_landmarks = landmarks_3d
+                if is_move:
+                    movement_detected = True
+                if abs(p) > ROT_THRESH or abs(y) > ROT_THRESH:
+                    rotation_detected = True
+
+            # Micro movements
+            landmarks_hist.append(landmarks_3d)
+            if len(landmarks_hist) > 30: landmarks_hist.pop(0)
+            nat, _ = detect_micro_movements(landmarks_hist, frames=8)
+            micro_verified = nat
+
+            # Texture
+            face_area, _, _, _, _ = detect_face(frame)
+            real, _ = analyze_texture_lbp(face_area)
+            texture_verified = real
+
+        # Build final fusion score
+        static_score = depth_verified
+        dynamic_score = movement_detected or rotation_detected or micro_verified
+        verification_score = (local_fusion['static'] * static_score +
+                              local_fusion['dynamic'] * dynamic_score)
+
+        # Decision threshold at 0.5
+        if verification_score >= 0.5 and face is not None:
+            test_feats = extract_features(face)
+            sim = 1 - cosine(registered_features, test_feats)
+            return sim > 0.60
+        return False
+
+    finally:
+        cap.release()
+        cv2.VideoCapture = original_vc
+
 # Main execution flow
 if __name__ == "__main__":
     try:

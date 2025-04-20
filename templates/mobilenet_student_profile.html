@@ -316,9 +316,21 @@
                                             <img loading="lazy" src="{% static 'images/icons/face-scan-white.svg' %}" class="scanner-icon" alt="Face Scanner Interface" />
                                         </div>
                                         <div id="message" class="alert-message d-none"></div>
-                                        <button class="scan-button-main" id="capture-button">
-                                            <span>Scan</span>
-                                            <img loading="lazy" src="{% static 'images/icons/photo-capture.svg' %}" class="scan-icon-main" alt="" />
+                                        <button
+                                            class="scan-button-main{% if today_status == 'Present' %} disabled{% endif %}"
+                                            id="capture-button"
+                                            {% if today_status == 'Present' %}disabled{% endif %}>
+                                          <span>
+                                            {% if today_status == 'Present' %}
+                                              Already Present
+                                            {% else %}
+                                              Scan
+                                            {% endif %}
+                                          </span>
+                                          <img loading="lazy"
+                                               src="{% static 'images/icons/photo-capture.svg' %}"
+                                               class="scan-icon-main"
+                                               alt="" />
                                         </button>
                                     </div>
                                 </div>
@@ -355,6 +367,12 @@
     const infoContent1 = document.querySelector('.info-content-1');
     const infoContent3 = document.querySelector('.info-content-3');
     const closeButton = document.querySelector('.close-button');
+
+    // Short-circuit JS if today_status is 'Present'
+    if ({{ today_status|json_script:"todayStatus" }} === 'Present') {
+      captureButton.disabled = true;
+      return; // bail out so no webcam code ever executes
+    }
 
     // Check if face is registered on page load and update UI accordingly
     checkRegistrationStatus(true);

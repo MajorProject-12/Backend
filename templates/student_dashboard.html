@@ -103,9 +103,15 @@
             <div class="details">
                 <div class="details-wrapper">
                     <div class="details-content">
-                        <h1 class="details-title">Today Attendence Check In:</h1>
-                        <ul>                            
-                            <li>Not Completed</li>
+                        <h1 class="details-title">Today's Attendance Status:</h1>
+                        <ul>
+                            {% if status == "Present" %}
+                                <li style="color: green;">✔ Present</li>
+                            {% elif status == "Absent" %}
+                                <li style="color: red;">✖ Absent</li>
+                            {% else %}
+                                <li style="color: orange;">⌛ Not Checked In</li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
