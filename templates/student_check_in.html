@@ -150,41 +150,50 @@
     </style>
 
     <script>
-        // Updated student_check_in.js with video streaming functionality
 document.addEventListener('DOMContentLoaded', () => {
-    // Get DOM elements
     const video = document.getElementById('video');
     const scanButton = document.querySelector('.scan-button');
     const scannerIcon = document.querySelector('.scanner-icon');
     const greetingText = document.querySelector('.greeting-text');
 
-    // Create message element
     const messageDiv = document.createElement('div');
     messageDiv.id = 'message';
     messageDiv.className = 'alert-message d-none';
     document.querySelector('.face-scanner').appendChild(messageDiv);
 
-    // Video streaming variables
     let mediaStream = null;
     let isStreaming = false;
     let streamInterval = null;
-    const frameSendInterval = 200; // Send frames every 200ms
+    const frameSendInterval = 200;
 
-    // Function to check if face is registered
+    const collegeCoordinates = [
+        { lat: 16.345009976721016, lng: 80.5244310120301 },
+        { lat: 16.344743204932225, lng: 80.52520822955769 },
+        { lat: 16.34379294514378, lng: 80.52392028382043 },
+        { lat: 16.343506582000995, lng: 80.52474125169807 }
+    ];
+
+    function isUserInCollege(userLocation) {
+        const latitudes = collegeCoordinates.map(coord => coord.lat);
+        const longitudes = collegeCoordinates.map(coord => coord.lng);
+
+        const maxLat = Math.max(...latitudes);
+        const minLat = Math.min(...latitudes);
+        const maxLng = Math.max(...longitudes);
+        const minLng = Math.min(...longitudes);
+
+        return (
+            userLocation.lat >= minLat &&
+            userLocation.lat <= maxLat &&
+            userLocation.lng >= minLng &&
+            userLocation.lng <= maxLng
+        );
+    }
+
     function checkRegistrationStatus() {
-        console.log("Checking face registration status...");
-        displayMessage("Checking registration status...");
-
         fetch('/check_registration/')
-            .then(response => {
-                console.log("Registration status response:", response.status);
-                if (!response.ok) {
-                    throw new Error('Server returned ' + response.status);
-                }
-                return response.json();
-            })
+            .then(res => res.json())
             .then(data => {
-                console.log("Registration status data:", data);
                 if (data.is_registered) {
                     scanButton.disabled = false;
                     displayMessage("Face is registered. You can mark attendance.");
@@ -193,74 +202,49 @@ document.addEventListener('DOMContentLoaded', () => {
                     displayMessage("Face not registered. Please register your face in your profile first.");
                 }
             })
-            .catch(error => {
-                console.error('Error checking registration status:', error);
-                displayMessage('Unable to check registration status. ' + error.message);
+            .catch(err => {
+                console.error(err);
+                displayMessage("Error checking registration status.");
             });
     }
 
-    // Function to start the webcam stream
     function startWebcam() {
-        console.log("Starting webcam...");
-        displayMessage("Starting camera...");
-
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            console.error("Media devices API not supported");
-            displayMessage('Your browser does not support camera access.');
-            return Promise.reject('Media devices not supported');
+        if (!navigator.mediaDevices?.getUserMedia) {
+            displayMessage("Camera access not supported.");
+            return Promise.reject("Media not supported");
         }
 
-        return navigator.mediaDevices.getUserMedia({
-            video: {
-                width: { ideal: 640 },
-                height: { ideal: 480 },
-                facingMode: "user"
-            }
-        })
-        .then((stream) => {
-            console.log("Webcam started successfully");
-            mediaStream = stream;
-            video.srcObject = stream;
-            video.style.display = 'block';
-            scannerIcon.style.display = 'none';
-
-            // Make sure video is ready
-            return new Promise((resolve) => {
-                video.onloadedmetadata = function() {
-                    console.log("Video metadata loaded, dimensions:", video.videoWidth, "x", video.videoHeight);
-                    resolve(stream);
-                };
+        return navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                mediaStream = stream;
+                video.srcObject = stream;
+                video.style.display = 'block';
+                scannerIcon.style.display = 'none';
+                return new Promise(resolve => {
+                    video.onloadedmetadata = () => resolve(stream);
+                });
+            })
+            .catch(err => {
+                console.error("Webcam error:", err);
+                displayMessage("Camera access denied.");
+                return Promise.reject(err);
             });
-        })
-        .catch((error) => {
-            console.error("Error accessing webcam: ", error);
-            displayMessage('Unable to access webcam: ' + error.message);
-            return Promise.reject(error);
-        });
     }
 
-    // Function to stop the webcam
     function stopWebcam() {
-        console.log("Stopping webcam...");
         if (mediaStream) {
-            const tracks = mediaStream.getTracks();
-            tracks.forEach(track => {
-                track.stop();
-                console.log("Track stopped:", track.kind);
-            });
+            mediaStream.getTracks().forEach(track => track.stop());
             mediaStream = null;
-            video.srcObject = null;
-            video.style.display = 'none';
-            scannerIcon.style.display = 'block';
         }
+        video.srcObject = null;
+        video.style.display = 'none';
+        scannerIcon.style.display = 'block';
 
-        // Also stop the streaming interval
         if (streamInterval) {
             clearInterval(streamInterval);
             streamInterval = null;
         }
 
-        // Notify the server to clean up resources
         fetch('/stop_video_stream/', {
             method: 'POST',
             headers: {
@@ -268,49 +252,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 'X-CSRFToken': getCookie('csrftoken'),
             },
             body: JSON.stringify({ stop: true })
-        }).catch(error => {
-            console.error('Error stopping stream on server:', error);
-        });
+        }).catch(err => console.error("Stop stream error:", err));
 
         isStreaming = false;
     }
 
-    // Function to capture image from video
     function captureImage() {
-        console.log("Capturing image...");
-        try {
-            if (!video.videoWidth) {
-                console.error("Video not ready yet");
-                return null;
-            }
+        if (!video.videoWidth) return null;
 
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            console.log("Canvas dimensions:", canvas.width, "x", canvas.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0);
 
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            const imageData = canvas.toDataURL('image/jpeg', 0.85);
-            console.log("Image captured, data length:", imageData.length);
-
-            return imageData;
-        } catch (error) {
-            console.error("Error capturing image:", error);
-            return null;
-        }
+        return canvas.toDataURL('image/jpeg');
     }
 
-    // Function to send a single frame to the server
     function sendFrame() {
         if (!isStreaming) return;
-
         const imageData = captureImage();
-        if (!imageData) {
-            console.error("Failed to capture frame");
-            return;
-        }
+        if (!imageData) return;
 
         fetch('/receive_video_frame/', {
             method: 'POST',
@@ -319,26 +281,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 'X-CSRFToken': getCookie('csrftoken'),
             },
             body: JSON.stringify({ frame: imageData })
-        })
-        .then(response => response.json())
-        .catch(error => {
-            console.error('Error sending frame:', error);
-        });
+        }).catch(err => console.error("Frame error:", err));
     }
 
-    // Function to start streaming video frames to the server
     function startStreaming() {
         if (isStreaming) return;
-
         isStreaming = true;
-        // Send frames at regular intervals
         streamInterval = setInterval(sendFrame, frameSendInterval);
-        console.log("Started streaming frames to server");
     }
 
-    // Function to verify attendance with collected frames
     function verifyAttendance() {
-        displayMessage('Processing attendance... Please wait');
+        displayMessage("Processing attendance...");
 
         fetch('/start_attendance_verification/', {
             method: 'POST',
@@ -348,101 +301,87 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({ verify: true })
         })
-        .then(response => {
-            console.log("Attendance verification response status:", response.status);
-            if (!response.ok) {
-                throw new Error('Server returned ' + response.status);
-            }
-            return response.json();
-        })
+        .then(res => res.json())
         .then(data => {
-            console.log("Attendance verification response:", data);
-
             if (data.success) {
-                // Success animation
                 greetingText.innerHTML = "Attendance<br>Marked!";
                 greetingText.style.color = "#4CAF50";
-                displayMessage(data.message || 'Attendance marked successfully!');
+                displayMessage(data.message || "Attendance marked!");
 
-                // Reload the page after a delay to show updated status
                 setTimeout(() => {
                     window.location.reload();
                 }, 3000);
             } else {
-                // Error message
-                displayMessage(data.message || 'Failed to mark attendance');
+                displayMessage(data.message || "Failed to mark attendance.");
             }
-
-            // Stop the webcam and streaming
             stopWebcam();
         })
-        .catch(error => {
-            console.error('Error during attendance verification:', error);
-            displayMessage('Error: ' + error.message);
+        .catch(err => {
+            console.error("Verification error:", err);
+            displayMessage("Verification failed.");
             stopWebcam();
         });
     }
 
-    // Event listener for scan button
     scanButton.addEventListener('click', () => {
-        // Store original greeting text if not already stored
-        if (!greetingText.getAttribute('data-original-text')) {
-            greetingText.setAttribute('data-original-text', greetingText.innerHTML);
-        }
+        displayMessage("Checking location...");
 
-        // Start the process
-        startWebcam()
-            .then(() => {
-                displayMessage('Position your face in the frame. Starting verification...');
-                startStreaming();
+        navigator.geolocation.getCurrentPosition(position => {
+            const userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
 
-                // Collect frames for several seconds before verification
-                const collectionTime = 8000; // 8 seconds of video capture
-                setTimeout(() => {
-                    displayMessage('Analyzing facial data for attendance...');
+            if (!isUserInCollege(userLocation)) {
+                alert("Access Denied: You are not within the college premises.");
+                displayMessage("You must be within the college premises to mark attendance.");
+                return;
+            }
 
-                    // Stop streaming but keep camera on while processing
-                    isStreaming = false;
-                    if (streamInterval) {
+            if (!greetingText.getAttribute('data-original-text')) {
+                greetingText.setAttribute('data-original-text', greetingText.innerHTML);
+            }
+
+            startWebcam()
+                .then(() => {
+                    displayMessage("Position your face. Starting verification...");
+                    startStreaming();
+
+                    setTimeout(() => {
+                        displayMessage("Analyzing...");
+                        isStreaming = false;
                         clearInterval(streamInterval);
                         streamInterval = null;
-                    }
+                        verifyAttendance();
+                    }, 8000);
+                })
+                .catch(err => {
+                    console.error(err);
+                    displayMessage("Camera permission denied.");
+                });
 
-                    // Start the verification process
-                    verifyAttendance();
-                }, collectionTime);
-            })
-            .catch(error => {
-                console.error("Failed to start webcam for attendance:", error);
-                displayMessage("Failed to start camera. Please check permissions and try again.");
-            });
+        }, error => {
+            console.error("Geolocation error:", error);
+            displayMessage("Location error. Please enable GPS.");
+        });
     });
 
-    // Function to display messages
-    function displayMessage(message) {
-        console.log("Message:", message);
-        if (messageDiv) {
-            messageDiv.textContent = message;
-            messageDiv.classList.remove('d-none');
-
-            // Don't auto-hide error messages
-            if (!message.includes('error') && !message.includes('failed') && !message.includes('Unable')) {
-                setTimeout(() => {
-                    messageDiv.classList.add('d-none');
-                }, 5000);
-            }
+    function displayMessage(msg) {
+        messageDiv.textContent = msg;
+        messageDiv.classList.remove('d-none');
+        if (!msg.toLowerCase().includes("error") && !msg.toLowerCase().includes("failed")) {
+            setTimeout(() => messageDiv.classList.add('d-none'), 5000);
         }
     }
 
-    // Utility function to get CSRF token
     function getCookie(name) {
         let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
+        if (document.cookie) {
             const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
                     break;
                 }
             }
@@ -450,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return cookieValue;
     }
 
-    // Add some basic styling for message div
+    // Styling for message
     const style = document.createElement('style');
     style.textContent = `
         .alert-message {
@@ -468,9 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
 
-    // Check registration status on page load
     checkRegistrationStatus();
 });
-    </script>
+</script>
+
 </body>
 </html>
